@@ -1,6 +1,5 @@
 #include "def.h"
 
-
 // flexible flat cable pins
 // VCC = VCC
 // GND = GND
@@ -52,6 +51,15 @@ void send_command(uint8_t cmd) {
 }
 
 // TODO!
+
+void send_data(uint8_t data) {
+    gpio_set_level(PIN_NUM_DC, 1); // Data mode
+    spi_transaction_t t = {
+        .length = 8,              // Data is 8 bits
+        .tx_buffer = &data
+    };
+    spi_device_transmit(spi, &t);
+}
 
 void display_reset(void) {
     gpio_set_level(PIN_NUM_RST, 0);

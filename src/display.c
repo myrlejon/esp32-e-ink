@@ -10,7 +10,7 @@
 #define PIN_NUM_CS 15 //CS
 #define PIN_NUM_BUSY 25 //BUSY
 #define PIN_NUM_RST 26 //RST
-#define PIN_NUM_DC 27 //DC
+#define PIN_NUM_DC 27 //DC - 0 = command mode | 1 = data mode
 #define PIN_NUM_ADC 36 //ADC
 
 spi_device_handle_t spi;
@@ -41,6 +41,7 @@ void gpio_init(void) {
     gpio_set_direction(PIN_NUM_BUSY, GPIO_MODE_INPUT);
 }
 
+// send_command() och send_data() kan bli en metod med level som parameter
 void send_command(uint8_t cmd) {
     gpio_set_level(PIN_NUM_DC, 0); // command mode
     spi_transaction_t t = {
@@ -50,12 +51,10 @@ void send_command(uint8_t cmd) {
     spi_device_transmit(spi, &t);
 }
 
-// TODO!
-
 void send_data(uint8_t data) {
-    gpio_set_level(PIN_NUM_DC, 1); // Data mode
+    gpio_set_level(PIN_NUM_DC, 1); // data mode
     spi_transaction_t t = {
-        .length = 8,              // Data is 8 bits
+        .length = 8,              // data is 8 bits
         .tx_buffer = &data
     };
     spi_device_transmit(spi, &t);
@@ -97,4 +96,26 @@ void display_image(const uint8_t *image, int length) {
     send_data(0xF7);    // Mode for full update
     send_command(0x20); // Trigger display refresh
     wait_until_idle();
+}
+
+void display_clear(void) {
+    send_command(0x24); // RAM write command
+    for (int i = 0; i < (EPD_WIDTH * EPD_HEIGHT / 8); i++) {
+        send_data(0xFF); // all white
+    }
+    send_command(0x22); // Display update control
+    send_data(0xF7);    // Full update mode
+    send_command(0x20); // Trigger refresh
+    wait_until_idle();
+}
+
+// 13.1 - 1. supply VCI > wait 10ms
+void display_power_on(void) {
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+}
+
+// 13.1 - 6. power off 
+void deep_sleep(void) {
+    send_command(0x10);
+    send_data(0x01); // deep sleep mode 1 (se commands 7)
 }

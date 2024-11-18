@@ -7,7 +7,13 @@ void app_main() {
     display_power_on();
 
     //2. set initial configuration
-    spi_init();
-    
+    set_init_configuration();
 
+    //3. send Initialization Code
+    set_init_code();
+
+    //4. 
+
+    //6. power off (deep sleep)
+    deep_sleep();
 }

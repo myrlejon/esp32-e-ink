@@ -114,8 +114,70 @@ void display_power_on(void) {
     vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
+// 13.1 - 2. set initial configuration
+void set_init_configuration(void) {
+    gpio_init();
+    spi_init();
+    display_reset();
+    send_command(0x12);
+    wait_until_idle();
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+}
+
+// 13.1 - 3. set initialization code
+void set_init_code(void) {
+    // // set gate driver output by command 0x01
+    // send_command(0x01);
+    // send_data(0x28);
+    // send_data(0x01);
+    // send_data(0x00);
+    // // set display RAM size
+    // send_command(0x11);
+    // send_command(0x44);
+    // send_command(0x45);
+    // // set panel border
+    // send_command(0x3C);
+
+    // shitgpt
+    // Step 1: Driver Output Control
+    send_command(0x01);
+    send_data(0x28); // GD lower byte
+    send_data(0x01); // GD upper bits
+    send_data(0x00); // Driver control
+
+    // Step 2: Booster Soft Start
+    // 0x06 är FEL det ska vara 0x04
+    send_command(0x06);
+    send_data(0x17);
+    send_data(0x17);
+    send_data(0x17);
+
+    // Step 3: Gate Driving Voltage
+    send_command(0x03);
+    send_data(0x00); // Example data
+
+    // Step 4: Source Driving Voltage
+    send_command(0x04);
+    send_data(0xA8); // Example data for voltage control
+    send_data(0xA8);
+    send_data(0xA8);
+
+    // Step 5: Data Entry Mode
+    send_command(0x11);
+    send_data(0x03);
+
+    // Step 6: RAM Address Setup
+    send_command(0x44); // Set RAM x-start/end
+    send_data(0x00);
+    send_data(0x18); // End address
+    send_command(0x45); // Set RAM y-start/end
+    send_data(0x00);
+    send_data(0xF9); // End address for 296 lines
+}
+
 // 13.1 - 6. power off 
 void deep_sleep(void) {
     send_command(0x10);
     send_data(0x01); // deep sleep mode 1 (se commands 7)
 }
+

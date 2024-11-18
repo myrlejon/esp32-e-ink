@@ -12,3 +12,5 @@ void display_image(const uint8_t *image, int length);
 void display_clear(void);
 void display_power_on(void);
 void deep_sleep(void);
+void set_init_configuration(void);
+void set_init_code(void);

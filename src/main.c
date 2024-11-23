@@ -12,7 +12,11 @@ void app_main() {
     //3. send Initialization Code
     set_init_code();
 
-    //4. 
+    //4. load waveform LUT 
+    load_waveform_lut();
+
+    //5. write image
+    write_image();
 
     //6. power off (deep sleep)
     deep_sleep();

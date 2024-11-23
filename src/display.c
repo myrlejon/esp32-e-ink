@@ -4,6 +4,8 @@
 // VCC = VCC
 // GND = GND
 
+const uint32_t TOTAL_PIXELS = 30500;
+
 #define PIN_NUM_KEY 12 //KEY
 #define PIN_NUM_SCK 13 //SCK or CLK clock input
 #define PIN_NUM_DIN 14 //DIN or MOSI (master out slave in)
@@ -124,6 +126,7 @@ void set_init_configuration(void) {
     vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
+// chatgpt cv paste
 // 13.1 - 3. set initialization code
 void set_init_code(void) {
     // // set gate driver output by command 0x01
@@ -173,6 +176,43 @@ void set_init_code(void) {
     send_command(0x45); // Set RAM y-start/end
     send_data(0x00);
     send_data(0xF9); // End address for 296 lines
+}
+
+// 13.1 - 4. load waveform LUT
+void load_waveform_lut(void) {
+    send_command(0x18);  // temperature sense command
+    send_data(0x00); 
+
+    send_command(0x22);  // load waveform from OTP command
+    send_data(0xC7);
+    send_command(0x20);  // trigger the load process
+    
+    // wait for BUSY pin
+    wait_until_idle();
+}
+
+// TODO - add parameter for sending in data to write RAM (0x24)
+// 13.1 - 5. write image and drive display panel 
+void write_image() {
+    
+    // write image data in RAM
+    send_command(0x4E); // X adress
+    send_data(0x00);
+    send_command(0x4F); // Y adress
+    send_data(0x00); // low byte - 0-255
+    send_data(0x00); // high byte - for Y > 255
+    
+    // send_command(0x26) // write RAM (RED)
+    send_command(0x24); // write RAM (white)
+    for (int i = 0; i < TOTAL_PIXELS / 8; i++) {
+        send_data(0x00);
+    }
+
+    send_command(0x0C); // booster soft start
+    send_data(0x8B);
+    send_data(0x9C);
+    send_data(0x96);
+    send_data(0x0F);
 }
 
 // 13.1 - 6. power off 

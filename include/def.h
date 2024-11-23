@@ -14,3 +14,5 @@ void display_power_on(void);
 void deep_sleep(void);
 void set_init_configuration(void);
 void set_init_code(void);
+void load_waveform_lut(void);
+void write_image(void);

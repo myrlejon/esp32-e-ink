@@ -1,4 +1,5 @@
 #include "def.h"
+#include "esp_log.h"
 
 // flexible flat cable pins
 // VCC = VCC
@@ -18,6 +19,7 @@ const uint32_t TOTAL_PIXELS = 30500;
 spi_device_handle_t spi;
 
 void spi_init(void) {
+    ESP_LOGI("init", "starting SPI init...");
     spi_bus_config_t buscfg = {
         .miso_io_num = -1, // not needed as the display is a slave
         .mosi_io_num = PIN_NUM_DIN,
@@ -35,12 +37,15 @@ void spi_init(void) {
         .queue_size = 7,                    // Queue size
     };
     spi_bus_add_device(SPI2_HOST, &devcfg, &spi);
+    ESP_LOGI("init", "SPI done");
 }
 
 void gpio_init(void) {
+    ESP_LOGI("init", "init GPIO...");
     gpio_set_direction(PIN_NUM_DC, GPIO_MODE_OUTPUT);
     gpio_set_direction(PIN_NUM_RST, GPIO_MODE_OUTPUT);
     gpio_set_direction(PIN_NUM_BUSY, GPIO_MODE_INPUT);
+    ESP_LOGI("init", "GPIO done");
 }
 
 // send_command() och send_data() kan bli en metod med level som parameter
@@ -63,10 +68,12 @@ void send_data(uint8_t data) {
 }
 
 void display_reset(void) {
+    ESP_LOGI("display reset", "resetting display...");
     gpio_set_level(PIN_NUM_RST, 0);
     vTaskDelay(10 / portTICK_PERIOD_MS);
     gpio_set_level(PIN_NUM_RST, 1);
     vTaskDelay(10 / portTICK_PERIOD_MS);
+    ESP_LOGI("display reset", "done");
 }
 
 void display_init(void) {
@@ -118,28 +125,30 @@ void display_power_on(void) {
 
 // 13.1 - 2. set initial configuration
 void set_init_configuration(void) {
+    ESP_LOGI("init", "starting initial configuration");
     gpio_init();
     spi_init();
     display_reset();
-    send_command(0x12);
+    send_command(0x12); //SW reset
     wait_until_idle();
     vTaskDelay(10 / portTICK_PERIOD_MS);
+    ESP_LOGI("init", "init done");
 }
 
 // chatgpt cv paste
 // 13.1 - 3. set initialization code
 void set_init_code(void) {
-    // // set gate driver output by command 0x01
-    // send_command(0x01);
-    // send_data(0x28);
-    // send_data(0x01);
-    // send_data(0x00);
-    // // set display RAM size
-    // send_command(0x11);
-    // send_command(0x44);
-    // send_command(0x45);
-    // // set panel border
-    // send_command(0x3C);
+    // set gate driver output by command 0x01
+    send_command(0x01);
+    send_data(0x28);
+    send_data(0x01);
+    send_data(0x00);
+    // set display RAM size
+    send_command(0x11);
+    send_command(0x44);
+    send_command(0x45);
+    // set panel border
+    send_command(0x3C);
 
     // shitgpt
     // Step 1: Driver Output Control
@@ -194,6 +203,9 @@ void load_waveform_lut(void) {
 // TODO - add parameter for sending in data to write RAM (0x24)
 // 13.1 - 5. write image and drive display panel 
 void write_image() {
+
+    // clear display
+    display_clear();
     
     // write image data in RAM
     send_command(0x4E); // X adress

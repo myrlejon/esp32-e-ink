@@ -140,33 +140,33 @@ void set_init_configuration(void) {
 void set_init_code(void) {
     // set gate driver output by command 0x01
     send_command(0x01);
-    send_data(0x28);
+    send_data(0x27);
     send_data(0x01);
     send_data(0x00);
-    // set display RAM size
+    // booster soft start
+    send_command(0x0C);
+    send_data(0x8B);
+    send_data(0x9C);
+    send_data(0x96);
+    send_data(0x0F);
+    // data entry mode setting
     send_command(0x11);
-    send_command(0x44);
-    send_command(0x45);
+    send_data(0x03);
+    // set display RAM size
+    send_command(0x44); // X-axis
+    send_data(0x00);
+    send_data(0x15);
+    send_command(0x45); // Y-axis
+    send_data(0x00);
+    send_data(0x00);
+    send_data(0x27);
+    send_data(0x01);
     // set panel border
     send_command(0x3C);
-
-    // shitgpt
-    // Step 1: Driver Output Control
-    send_command(0x01);
-    send_data(0x28); // GD lower byte
-    send_data(0x01); // GD upper bits
-    send_data(0x00); // Driver control
-
-    // Step 2: Booster Soft Start
-    // 0x06 är FEL det ska vara 0x04
-    send_command(0x06);
-    send_data(0x17);
-    send_data(0x17);
-    send_data(0x17);
-
-    // Step 3: Gate Driving Voltage
+    send_data(0xC0);
+    // gate driving voltage
     send_command(0x03);
-    send_data(0x00); // Example data
+    send_data(0x00);
 
     // Step 4: Source Driving Voltage
     send_command(0x04);
@@ -219,12 +219,6 @@ void write_image() {
     for (int i = 0; i < TOTAL_PIXELS / 8; i++) {
         send_data(0x00);
     }
-
-    send_command(0x0C); // booster soft start
-    send_data(0x8B);
-    send_data(0x9C);
-    send_data(0x96);
-    send_data(0x0F);
 }
 
 // 13.1 - 6. power off 

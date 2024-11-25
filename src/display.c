@@ -76,19 +76,19 @@ void display_reset(void) {
     ESP_LOGI("display reset", "done");
 }
 
-void display_init(void) {
-    display_reset();
-    send_command(0x01);  // POWER SETTING
-    send_data(0x03);     // Example settings; check your model's initialization sequence
-    send_data(0x00);
-    send_data(0x2b);
-    send_data(0x2b);
-    send_command(0x06);  // BOOSTER SOFT START
-    send_data(0x17);
-    send_data(0x17);
-    send_data(0x17);
-    // Continue with additional commands as per datasheet
-}
+// void display_init(void) {
+//     display_reset();
+//     send_command(0x01);  // POWER SETTING
+//     send_data(0x03);     // Example settings; check your model's initialization sequence
+//     send_data(0x00);
+//     send_data(0x2b);
+//     send_data(0x2b);
+//     send_command(0x06);  // BOOSTER SOFT START
+//     send_data(0x17);
+//     send_data(0x17);
+//     send_data(0x17);
+//     // Continue with additional commands as per datasheet
+// }
 
 void wait_until_idle(void) {
     while (gpio_get_level(PIN_NUM_BUSY) == 1) {
@@ -96,16 +96,16 @@ void wait_until_idle(void) {
     }
 }
 
-void display_image(const uint8_t *image, int length) {
-    send_command(0x24); // Write RAM command
-    for (int i = 0; i < length; i++) {
-        send_data(image[i]);
-    }
-    send_command(0x22); // Display update control
-    send_data(0xF7);    // Mode for full update
-    send_command(0x20); // Trigger display refresh
-    wait_until_idle();
-}
+// void display_image(const uint8_t *image, int length) {
+//     send_command(0x24); // Write RAM command
+//     for (int i = 0; i < length; i++) {
+//         send_data(image[i]);
+//     }
+//     send_command(0x22); // Display update control
+//     send_data(0xF7);    // Mode for full update
+//     send_command(0x20); // Trigger display refresh
+//     wait_until_idle();
+// }
 
 void display_clear(void) {
     send_command(0x24); // RAM write command
@@ -197,7 +197,7 @@ void load_waveform_lut(void) {
 // TODO - add parameter for sending in data to write RAM (0x24)
 // 13.1 - 5. write image and drive display panel 
 void write_image() {
-
+    ESP_LOGI("write_image", "starting...");
     // clear display
     display_clear();
     
@@ -211,13 +211,15 @@ void write_image() {
     // send_command(0x26) // write RAM (RED)
     send_command(0x24); // write RAM (white)
     for (int i = 0; i < TOTAL_PIXELS / 8; i++) {
-        if(i % 2 == 0) {
-            send_data(0x00);
-        }
-        else {
-            send_data(0xFF);
-        }
+        uint8_t data = 0x55;
+        send_data(data);
     }
+
+    send_command(0x22);  // load waveform from OTP command
+    send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor
+    send_command(0x20);  // trigger the load process
+
+    ESP_LOGI("write_image", "done");
 }
 
 // 13.1 - 6. power off 

@@ -138,6 +138,7 @@ void set_init_configuration(void) {
 // chatgpt cv paste
 // 13.1 - 3. set initialization code
 void set_init_code(void) {
+    ESP_LOGI("init", "starting 3. set init code...");
     // set gate driver output by command 0x01
     send_command(0x01);
     send_data(0x27);
@@ -167,30 +168,22 @@ void set_init_code(void) {
     // gate driving voltage
     send_command(0x03);
     send_data(0x00);
-
-    // Step 4: Source Driving Voltage
+    // source driving voltage
     send_command(0x04);
-    send_data(0xA8); // Example data for voltage control
-    send_data(0xA8);
-    send_data(0xA8);
-
-    // Step 5: Data Entry Mode
-    send_command(0x11);
-    send_data(0x03);
-
-    // Step 6: RAM Address Setup
-    send_command(0x44); // Set RAM x-start/end
+    send_data(0x97); // 0x97 = 3.3V | 0xA8 = 5V
     send_data(0x00);
-    send_data(0x18); // End address
-    send_command(0x45); // Set RAM y-start/end
     send_data(0x00);
-    send_data(0xF9); // End address for 296 lines
+    ESP_LOGI("init", "done");
 }
 
 // 13.1 - 4. load waveform LUT
 void load_waveform_lut(void) {
+    ESP_LOGI("load_waveform_lut", "starting...");
     send_command(0x18);  // temperature sense command
-    send_data(0x00); 
+    send_data(0x80); // internal temp sensor
+
+    // send_command(0x21);
+    // send_data(0x00);
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xC7);
@@ -198,6 +191,7 @@ void load_waveform_lut(void) {
     
     // wait for BUSY pin
     wait_until_idle();
+    ESP_LOGI("load_waveform_lut", "done");
 }
 
 // TODO - add parameter for sending in data to write RAM (0x24)
@@ -217,7 +211,12 @@ void write_image() {
     // send_command(0x26) // write RAM (RED)
     send_command(0x24); // write RAM (white)
     for (int i = 0; i < TOTAL_PIXELS / 8; i++) {
-        send_data(0x00);
+        if(i % 2 == 0) {
+            send_data(0x00);
+        }
+        else {
+            send_data(0xFF);
+        }
     }
 }
 

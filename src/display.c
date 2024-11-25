@@ -76,37 +76,6 @@ void display_reset(void) {
     ESP_LOGI("display reset", "done");
 }
 
-// void display_init(void) {
-//     display_reset();
-//     send_command(0x01);  // POWER SETTING
-//     send_data(0x03);     // Example settings; check your model's initialization sequence
-//     send_data(0x00);
-//     send_data(0x2b);
-//     send_data(0x2b);
-//     send_command(0x06);  // BOOSTER SOFT START
-//     send_data(0x17);
-//     send_data(0x17);
-//     send_data(0x17);
-//     // Continue with additional commands as per datasheet
-// }
-
-void wait_until_idle(void) {
-    while (gpio_get_level(PIN_NUM_BUSY) == 1) {
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
-}
-
-// void display_image(const uint8_t *image, int length) {
-//     send_command(0x24); // Write RAM command
-//     for (int i = 0; i < length; i++) {
-//         send_data(image[i]);
-//     }
-//     send_command(0x22); // Display update control
-//     send_data(0xF7);    // Mode for full update
-//     send_command(0x20); // Trigger display refresh
-//     wait_until_idle();
-// }
-
 void display_clear(void) {
     send_command(0x24); // RAM write command
     for (int i = 0; i < (EPD_WIDTH * EPD_HEIGHT / 8); i++) {
@@ -117,6 +86,13 @@ void display_clear(void) {
     send_command(0x20); // Trigger refresh
     wait_until_idle();
 }
+
+void wait_until_idle(void) {
+    while (gpio_get_level(PIN_NUM_BUSY) == 1) {
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+}
+
 
 // 13.1 - 1. supply VCI > wait 10ms
 void display_power_on(void) {
@@ -135,7 +111,6 @@ void set_init_configuration(void) {
     ESP_LOGI("init", "init done");
 }
 
-// chatgpt cv paste
 // 13.1 - 3. set initialization code
 void set_init_code(void) {
     ESP_LOGI("init", "starting 3. set init code...");
@@ -160,8 +135,8 @@ void set_init_code(void) {
     send_command(0x45); // Y-axis
     send_data(0x00);
     send_data(0x00);
-    send_data(0x27);
-    send_data(0x01);
+    send_data(0x7F);
+    send_data(0x00);
     // set panel border
     send_command(0x3C);
     send_data(0xC0);
@@ -212,6 +187,9 @@ void write_image() {
     send_command(0x24); // write RAM (white)
     for (int i = 0; i < TOTAL_PIXELS / 8; i++) {
         uint8_t data = 0x55;
+        if (i % 2 == 0) {
+            data = 0xAA;
+        }
         send_data(data);
     }
 

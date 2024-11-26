@@ -67,6 +67,15 @@ void send_data(uint8_t data) {
     spi_device_transmit(spi, &t);
 }
 
+void send_bit_data(uint8_t data) {
+    gpio_set_level(PIN_NUM_DC, 1); // data mode
+    spi_transaction_t t = {
+        .length = 1,              // data is 1 bits
+        .tx_buffer = &data
+    };
+    spi_device_transmit(spi, &t);
+}
+
 void display_reset(void) {
     ESP_LOGI("display reset", "resetting display...");
     gpio_set_level(PIN_NUM_RST, 0);
@@ -78,9 +87,14 @@ void display_reset(void) {
 
 void display_clear(void) {
     send_command(0x24); // RAM write command
-    for (int i = 0; i < (EPD_WIDTH * EPD_HEIGHT / 8); i++) {
+    for (int i = 0; i < TOTAL_PIXELS; i++) {
+        send_data(0x00); // all black
+    }
+    send_command(0x24);
+    for (int i = 0; i < TOTAL_PIXELS; i++) {
         send_data(0xFF); // all white
     }
+
     send_command(0x22); // Display update control
     send_data(0xF7);    // Full update mode
     send_command(0x20); // Trigger refresh
@@ -135,8 +149,8 @@ void set_init_code(void) {
     send_command(0x45); // Y-axis
     send_data(0x00);
     send_data(0x00);
-    send_data(0x7F);
-    send_data(0x00);
+    send_data(0x27);
+    send_data(0x01);
     // set panel border
     send_command(0x3C);
     send_data(0xC0);
@@ -183,15 +197,17 @@ void write_image() {
     send_data(0x00); // low byte - 0-255
     send_data(0x00); // high byte - for Y > 255
     
+    wait_until_idle();
+
     // send_command(0x26) // write RAM (RED)
-    send_command(0x24); // write RAM (white)
+    send_command(0x24); // write RAM white/black
+    // totala pixlar 30500, men vi skickar in en byte i taget så 30500 / 8 = 3812.5
+
     for (int i = 0; i < TOTAL_PIXELS / 8; i++) {
-        uint8_t data = 0x55;
-        if (i % 2 == 0) {
-            data = 0xAA;
-        }
-        send_data(data);
+        send_data(0xAA);
     }
+
+    wait_until_idle();
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor
@@ -202,6 +218,7 @@ void write_image() {
 
 // 13.1 - 6. power off 
 void deep_sleep(void) {
+    ESP_LOGI("deep sleep", "goodnight");
     send_command(0x10);
     send_data(0x01); // deep sleep mode 1 (se commands 7)
 }

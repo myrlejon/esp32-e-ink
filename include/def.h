@@ -5,6 +5,7 @@ void spi_init(void);
 void gpio_init(void);
 void send_command(uint8_t cmd);
 void send_data(uint8_t data);
+void send_bit_data(uint8_t data);
 void display_reset(void);
 void wait_until_idle(void);
 void display_clear(void);

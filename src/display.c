@@ -199,13 +199,8 @@ void write_image() {
     
     wait_until_idle();
 
-    // send_command(0x26) // write RAM (RED)
-    send_command(0x24); // write RAM white/black
-    // totala pixlar 30500, men vi skickar in en byte i taget så 30500 / 8 = 3812.5
-
-    for (int i = 0; i < TOTAL_PIXELS / 8; i++) {
-        send_data(0xAA);
-    }
+    write_image_to_display();
+    // draw();
 
     wait_until_idle();
 

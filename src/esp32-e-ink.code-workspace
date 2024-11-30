@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"name": "esp32-e-ink",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"nvs_flash.h": "c",
+			"u8g2.h": "c",
+			"u8g2_esp32_hal.h": "c",
+			"spi_master.h": "c",
+			"esp_wifi.h": "c",
+			"freertos.h": "c",
+			"stdio.h": "c",
+			"random": "c",
+			"epdiy.h": "c",
+			"epd_driver.h": "c",
+			"epd_internals.h": "c",
+			"epd_board_specific.h": "c",
+			"gpio.h": "c",
+			"spi_common.h": "c"
+		}
+	}
+}

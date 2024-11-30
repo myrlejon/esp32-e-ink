@@ -15,3 +15,5 @@ void set_init_configuration(void);
 void set_init_code(void);
 void load_waveform_lut(void);
 void write_image(void);
+void draw(void);
+void write_image_to_display(void);

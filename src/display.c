@@ -199,7 +199,8 @@ void write_image() {
     
     wait_until_idle();
 
-    write_image_to_display();
+    write_image_txt_to_display();
+    //write_image_to_display();
     // draw();
 
     wait_until_idle();

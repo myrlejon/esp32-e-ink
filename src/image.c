@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <image.h>
 
 #define DISPLAY_WIDTH 250
 #define DISPLAY_HEIGHT 122
@@ -27,29 +28,50 @@ void draw() {
     }
 }
 
-void write_image_to_display(void) {
-    const char *file_path = "C:/Users/nisse/Documents/PlatformIO/Projects/esp32-e-ink/src/dithered_image.bmp";
-    FILE *bmp_file = fopen(file_path, "rb");
-    if (!bmp_file) {
-        printf("Failed to open BMP file\n");
-        return;
-    }
+void write_image_txt_to_display(void) {
+    send_command(0x24);
+    int imageArraySize = sizeof(image_array) / sizeof(image_array[0]);
 
-    // Skip BMP header (54 bytes for a standard BMP)
-    fseek(bmp_file, 54, SEEK_SET);
+    ESP_LOGI("image info:", "array size: %d", imageArraySize);
 
-    // Prepare to read pixel data
-    uint8_t row_data[DISPLAY_WIDTH / 8]; // Each byte = 8 pixels
+    // TODO - fix watchdog timer
 
-    send_command(0x24); // Write RAM command
-
-    for (int y = 0; y < DISPLAY_HEIGHT; y++) {
-        fread(row_data, sizeof(uint8_t), DISPLAY_WIDTH / 8, bmp_file);
-
-        // Send row data to the display
-        for (int x = 0; x < DISPLAY_WIDTH / 8; x++) {
-            send_data(row_data[x]);
+    for (int i = 0; i < 4996; i++) {
+        if (i % 100 == 0) {
+            vTaskDelay(pdMS_TO_TICKS(1));
         }
+
+        if (i % 2 == 0) {
+            ESP_LOGI("info:", "iteration: %d", i);
+            send_data(0x00);
+        }
+        else {
+            ESP_LOGI("info:", "iteration: %d", i);
+            send_data(0xFF);    
+        }
+        // send_data(image_array[i]);
     }
-    fclose(bmp_file);
 }
+
+// void write_image_to_display(void) {
+//     const char *file_path = "dithered_image.bmp";
+//     FILE *bmp_file = fopen(file_path, "rb");
+//     if (!bmp_file) {
+//         printf("Failed to open BMP file\n");
+//         return;
+//     }
+
+//     fseek(bmp_file, 54, SEEK_SET);
+//     uint8_t row_data[DISPLAY_WIDTH / 8];
+//     send_command(0x24);
+
+//     for (int y = 0; y < DISPLAY_HEIGHT; y++) {
+//         fread(row_data, sizeof(uint8_t), DISPLAY_WIDTH / 8, bmp_file);
+
+//         // Send row data to the display
+//         for (int x = 0; x < DISPLAY_WIDTH / 8; x++) {
+//             send_data(row_data[x]);
+//         }
+//     }
+//     fclose(bmp_file);
+// }

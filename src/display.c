@@ -67,13 +67,19 @@ void send_data(uint8_t data) {
     spi_device_transmit(spi, &t);
 }
 
-void send_bit_data(uint8_t data) {
-    gpio_set_level(PIN_NUM_DC, 1); // data mode
+void read_data(uint8_t *buffer, size_t length) {
+    // Set to data mode
+    gpio_set_level(PIN_NUM_DC, 1);
+
     spi_transaction_t t = {
-        .length = 1,              // data is 1 bits
-        .tx_buffer = &data
+        .length = length * 8,    // Read 'length' bytes
+        .rx_buffer = buffer     // Buffer to store received data
     };
-    spi_device_transmit(spi, &t);
+
+    esp_err_t ret = spi_device_transmit(spi, &t);
+    if (ret != ESP_OK) {
+        ESP_LOGE("SPI", "Failed to read data: %s", esp_err_to_name(ret));
+    }
 }
 
 void display_reset(void) {

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <image.h>
+#include "esp_task_wdt.h"
 
 #define DISPLAY_WIDTH 250
 #define DISPLAY_HEIGHT 122
@@ -33,24 +34,29 @@ void write_image_txt_to_display(void) {
     int imageArraySize = sizeof(image_array) / sizeof(image_array[0]);
 
     ESP_LOGI("image info:", "array size: %d", imageArraySize);
+    ESP_LOGI("test", "%d", image_array[1]);
 
     // TODO - fix watchdog timer
 
-    for (int i = 0; i < 4996; i++) {
-        if (i % 100 == 0) {
-            vTaskDelay(pdMS_TO_TICKS(1));
-        }
+    for (int i = 0; i < imageArraySize; i++) {
+        // ESP_LOGI("image info:", "%d", image_array[i]);
+        send_data(image_array[i]);
 
-        if (i % 2 == 0) {
-            ESP_LOGI("info:", "iteration: %d", i);
-            send_data(0x00);
+        if (i % 500 == 0) {
+            ESP_LOGI("image info:", "kicking watchdog!");
+            esp_task_wdt_reset();
         }
-        else {
-            ESP_LOGI("info:", "iteration: %d", i);
-            send_data(0xFF);    
-        }
-        // send_data(image_array[i]);
     }
+
+    // uint8_t ram_data[4996];  // Adjust size as per your RAM requirements
+    // send_command(0x27);      // Send the read RAM command
+    // read_data(ram_data, sizeof(ram_data));
+
+    // // Process data, skipping the first dummy byte
+    // for (size_t i = 1; i < sizeof(ram_data); i++) {
+    //     ESP_LOGI("RAM Data", "Byte %d: 0x%02X", i - 1, ram_data[i]);
+    // }
+
 }
 
 // void write_image_to_display(void) {

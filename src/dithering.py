@@ -1,30 +1,26 @@
 from PIL import Image
 import numpy as np
 
-# Open and preprocess the image
 img = Image.open("../img/gnawer.png").convert("L")
 img = img.resize((122, 250), Image.Resampling.LANCZOS)
-img = img.convert("1")  # Convert to 1-bit monochrome
+img = img.convert("1")
 
 img.save("image.bmp")
 
-# Convert to numpy array for easier manipulation
 img_array = np.array(img)
-
-# Create a byte array
 byte_array = bytearray()
 width, height = img.size
 
 for y in range(height):
     byte = 0
     for x in range(width):
-        pixel = img_array[y, x]  # Get the pixel value (0 or 255)
-        if pixel == 0:  # Black pixel
+        pixel = img_array[y, x]  # get the pixel value (0 or 255)
+        if pixel == 0:  # black pixel
             byte |= (1 << (7 - (x % 8)))
-        if (x % 8) == 7:  # Every 8 pixels, store the byte
+        if (x % 8) == 7: 
             byte_array.append(byte)
             byte = 0
-    if width % 8 != 0:  # Pad the remaining bits in the last byte
+    if width % 8 != 0:  # pad the remaining bits in the last byte
         byte_array.append(byte)
 
 

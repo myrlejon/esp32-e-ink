@@ -29,6 +29,7 @@ void draw() {
     }
 }
 
+// image gets inverted (negative) pixels, probably a little/big endian problem in the python script
 void write_image_txt_to_display(void) {
     send_command(0x24);
     int imageArraySize = sizeof(image_array) / sizeof(image_array[0]);
@@ -36,11 +37,26 @@ void write_image_txt_to_display(void) {
     ESP_LOGI("image info:", "array size: %d", imageArraySize);
     ESP_LOGI("test", "%d", image_array[1]);
 
-    // TODO - fix watchdog timer
-
     for (int i = 0; i < imageArraySize; i++) {
-        // ESP_LOGI("image info:", "%d", image_array[i]);
+        if (i % 100 == 0) {
+            ESP_LOGI("image info:", "0x%02X", image_array[i]);
+        }
         send_data(image_array[i]);
+    }
+}
+
+void write_image_task(void *param) {
+    // Register this task to the Task Watchdog
+    ESP_ERROR_CHECK(esp_task_wdt_add(NULL)); // NULL refers to the current task
+
+    send_command(0x24);
+    // int imageArraySize = sizeof(image_array) / sizeof(image_array[0]);
+
+    for (int i = 0; i < 2000; i++) {
+        
+        if (i < 1000) {
+            send_data(0x00);
+        }
 
         if (i % 500 == 0) {
             ESP_LOGI("image info:", "kicking watchdog!");
@@ -48,16 +64,11 @@ void write_image_txt_to_display(void) {
         }
     }
 
-    // uint8_t ram_data[4996];  // Adjust size as per your RAM requirements
-    // send_command(0x27);      // Send the read RAM command
-    // read_data(ram_data, sizeof(ram_data));
-
-    // // Process data, skipping the first dummy byte
-    // for (size_t i = 1; i < sizeof(ram_data); i++) {
-    //     ESP_LOGI("RAM Data", "Byte %d: 0x%02X", i - 1, ram_data[i]);
-    // }
-
+    ESP_ERROR_CHECK(esp_task_wdt_delete(NULL));
+    ESP_LOGI("write_image_task", "Image writing complete");
+    vTaskDelete(NULL);
 }
+
 
 // void write_image_to_display(void) {
 //     const char *file_path = "dithered_image.bmp";

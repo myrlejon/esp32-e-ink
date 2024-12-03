@@ -1,3 +1,5 @@
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "def.h"
 #include "esp_log.h"
 
@@ -151,7 +153,7 @@ void set_init_code(void) {
     // set display RAM size
     send_command(0x44); // X-axis
     send_data(0x00);
-    send_data(0x15);
+    send_data(0x0F);
     send_command(0x45); // Y-axis
     send_data(0x00);
     send_data(0x00);
@@ -177,9 +179,6 @@ void load_waveform_lut(void) {
     send_command(0x18);  // temperature sense command
     send_data(0x80); // internal temp sensor
 
-    // send_command(0x21);
-    // send_data(0x00);
-
     send_command(0x22);  // load waveform from OTP command
     send_data(0xC7);
     send_command(0x20);  // trigger the load process
@@ -202,14 +201,16 @@ void write_image() {
     send_command(0x4F); // Y adress
     send_data(0x00); // low byte - 0-255
     send_data(0x00); // high byte - for Y > 255
-    
-    wait_until_idle();
+
+    // wait_until_idle();
+
+    // xTaskCreate(write_image_task, "WriteImageTask", 4096, NULL, 5, NULL);    
 
     write_image_txt_to_display();
     //write_image_to_display();
-    // draw();
+    //draw();
 
-    wait_until_idle();
+    // wait_until_idle();
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor

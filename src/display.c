@@ -202,15 +202,7 @@ void write_image() {
     send_data(0x00); // low byte - 0-255
     send_data(0x00); // high byte - for Y > 255
 
-    // wait_until_idle();
-
-    // xTaskCreate(write_image_task, "WriteImageTask", 4096, NULL, 5, NULL);    
-
-    write_image_txt_to_display();
-    //write_image_to_display();
-    //draw();
-
-    // wait_until_idle();
+    draw_rect(30, 50, 20, 20);
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor

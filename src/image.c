@@ -9,24 +9,64 @@
 #define DISPLAY_WIDTH 250
 #define DISPLAY_HEIGHT 122
 
-unsigned char byteArray[30500];
+char byteArray[DISPLAY_WIDTH][DISPLAY_HEIGHT];
 
-void draw() {
+void draw_rect(int xPos, int yPos, int width, int height) {
+
+    // xPos & yPos is the top-left position for the rectangle
+
+    int startPos = byteArray[xPos][yPos];
+    int bitCounter = 0;
+    int hexCounter = 0;
+    uint8_t hex = 0x00;
+
+    unsigned char rectArraySize = (DISPLAY_HEIGHT * DISPLAY_WIDTH) / 8;
+    unsigned char rectArray[rectArraySize];
+
+
+    for(int i = xPos; i <= width; i++) {
+        for(int j = yPos; j <= height; j++) {
+            if (bitCounter == 255) {
+                rectArray[hexCounter] = hex; 
+
+                hex = 0x00;
+                bitCounter = 0;
+                hexCounter++;
+            }
+            
+            if (i >= xPos && i <= width 
+             && j >= yPos && j <= height) {
+                // byteArray[i][j] = 0; // 0 = black
+                hex = (hex << 1) | 1; // msb/lsb don't matter since all black
+            }
+            bitCounter++;
+            
+            // // end of rectangle
+            // if (i * j > yPos * height) {
+            //     break; 
+            // }
+        }
+    }
 
     send_command(0x24);
-    
-    int arraySize = sizeof(byteArray) / sizeof(byteArray[0]);
 
-    for (int i = 0; i < arraySize / 8; i++) {
+    // fix this shit
+    for(int i = 0; i < 30500 / 8; i++) {
+        if (i >= startPos / 8) {
+            send_data(rectArray[i]);
+
+            // implement so it stops sending when the end of data is over,
+            // otherwise it will keep sending and overwrite itself
+        }
         
-        if (i % 2 == 0) {
-            byteArray[i] = 0xFF;
-        }
-        if (i % 3 == 0) {
-            byteArray[i] = 0x00;
-        }
-        send_data(byteArray[i]);
     }
+
+    // int arraySize = sizeof(byteArray) / sizeof(byteArray[0]);
+}
+
+void test(void) {
+    send_command(0x24);
+    send_data(0xF0);
 }
 
 // image gets inverted (negative) pixels, probably a little/big endian problem in the python script
@@ -44,51 +84,3 @@ void write_image_txt_to_display(void) {
         send_data(image_array[i]);
     }
 }
-
-void write_image_task(void *param) {
-    // Register this task to the Task Watchdog
-    ESP_ERROR_CHECK(esp_task_wdt_add(NULL)); // NULL refers to the current task
-
-    send_command(0x24);
-    // int imageArraySize = sizeof(image_array) / sizeof(image_array[0]);
-
-    for (int i = 0; i < 2000; i++) {
-        
-        if (i < 1000) {
-            send_data(0x00);
-        }
-
-        if (i % 500 == 0) {
-            ESP_LOGI("image info:", "kicking watchdog!");
-            esp_task_wdt_reset();
-        }
-    }
-
-    ESP_ERROR_CHECK(esp_task_wdt_delete(NULL));
-    ESP_LOGI("write_image_task", "Image writing complete");
-    vTaskDelete(NULL);
-}
-
-
-// void write_image_to_display(void) {
-//     const char *file_path = "dithered_image.bmp";
-//     FILE *bmp_file = fopen(file_path, "rb");
-//     if (!bmp_file) {
-//         printf("Failed to open BMP file\n");
-//         return;
-//     }
-
-//     fseek(bmp_file, 54, SEEK_SET);
-//     uint8_t row_data[DISPLAY_WIDTH / 8];
-//     send_command(0x24);
-
-//     for (int y = 0; y < DISPLAY_HEIGHT; y++) {
-//         fread(row_data, sizeof(uint8_t), DISPLAY_WIDTH / 8, bmp_file);
-
-//         // Send row data to the display
-//         for (int x = 0; x < DISPLAY_WIDTH / 8; x++) {
-//             send_data(row_data[x]);
-//         }
-//     }
-//     fclose(bmp_file);
-// }

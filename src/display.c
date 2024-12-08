@@ -202,7 +202,9 @@ void write_image() {
     send_data(0x00); // low byte - 0-255
     send_data(0x00); // high byte - for Y > 255
 
+    ESP_LOGI("draw_rect:", "starting...");
     draw_rect(30, 50, 20, 20);
+    // write_image_txt_to_display();
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor

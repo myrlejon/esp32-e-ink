@@ -21,3 +21,5 @@ void write_image_txt_to_display(void);
 void write_image_task(void *param);
 void test(void);
 void draw_rect(int xPos, int yPos, int width, int height);
+void clear_display();
+void draw();

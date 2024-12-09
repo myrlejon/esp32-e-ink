@@ -2,6 +2,7 @@
 #include "freertos/task.h"
 #include "def.h"
 #include "esp_log.h"
+#include "esp_task_wdt.h"
 
 // flexible flat cable pins
 // VCC = VCC
@@ -190,8 +191,8 @@ void load_waveform_lut(void) {
 
 // TODO - add parameter for sending in data to write RAM (0x24)
 // 13.1 - 5. write image and drive display panel 
-void write_image() {
-    ESP_LOGI("write_image", "starting...");
+void clear_display() {
+    ESP_LOGI("clear_display", "starting...");
     // clear display
     display_clear();
     
@@ -201,8 +202,11 @@ void write_image() {
     send_command(0x4F); // Y adress
     send_data(0x00); // low byte - 0-255
     send_data(0x00); // high byte - for Y > 255
+    ESP_LOGI("clear_display", "done");
+}
 
-    ESP_LOGI("draw_rect:", "starting...");
+void draw() {
+    ESP_LOGI("draw:", "starting...");
     draw_rect(30, 50, 20, 20);
     // write_image_txt_to_display();
 
@@ -210,7 +214,7 @@ void write_image() {
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor
     send_command(0x20);  // trigger the load process
 
-    ESP_LOGI("write_image", "done");
+    ESP_LOGI("draw:", "done");
 }
 
 // 13.1 - 6. power off 

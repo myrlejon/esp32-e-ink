@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 
-img = Image.open("../img/link.png").convert("L")
+img = Image.open("../img/gnawer.png").convert("L")
 img = img.resize((122, 250), Image.Resampling.LANCZOS)
 img = img.convert("1")
 

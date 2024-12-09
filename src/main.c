@@ -15,8 +15,11 @@ void app_main() {
     //4. load waveform LUT 
     load_waveform_lut();
 
-    //5. write image
-    write_image();
+    //5. clear display and set RAM
+    clear_display();
+
+    // draw on the e-ink display
+    draw();
 
     //6. power off (deep sleep)
     deep_sleep();

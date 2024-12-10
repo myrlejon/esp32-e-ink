@@ -11,75 +11,83 @@
 #define DISPLAY_HEIGHT 122
 
 // char byteArray[DISPLAY_WIDTH][DISPLAY_HEIGHT];
+// uint8_t byteArray[(250 * 122) / 8] = { 0x00 };
+uint8_t byteArray[3813] = { 0xFF };
+
+// set all bits to 1 (white)
+uint8_t bitArray[DISPLAY_WIDTH][DISPLAY_HEIGHT];
+// memset(bitArray, 1, sizeof(bitArray));
 
 void draw_rect(int xPos, int yPos, int width, int height) {
     ESP_LOGI("draw_rect:", "starting...");
-    // uint8_t byteArray[(250 * 122) / 8] = { 0xFF };
-    // uint8_t byteArray[3813] = { 0xFF };
-    // // set all bits to 1 (white)
-    // uint8_t bitArray[DISPLAY_WIDTH][DISPLAY_HEIGHT] = {{1}};
-    // memset(bitArray, 1, sizeof(bitArray));
 
-    // // rectangle should be written the same way as the display sends data to make it more easy
-    // // two loops with DISPLAY_WIDTH (250) on the outside and DISPLAY_HEIGHT(122) on the inside 
+    // set all elements to 1 (white)
+    for (int i = 0; i < DISPLAY_WIDTH; i++) {
+        for (int j = 0; j < DISPLAY_HEIGHT; j++) {
+            bitArray[i][j] = 1;
+        }
+    }
 
-    // ESP_LOGI("draw_rect:", "setting bits to black");
-    // //set bits to black
-    // for (int i = 0; i < DISPLAY_WIDTH; i++) {
-    //     for (int j = 0; j < DISPLAY_HEIGHT; j++) {
-    //         if (i > xPos && i < xPos + width &&
-    //             j > yPos && j < yPos + height &&
-    //             xPos + width <= DISPLAY_WIDTH &&
-    //             yPos + width <= DISPLAY_HEIGHT) {
-    //                 bitArray[i][j] = 0; // 0 = black
-    //                 ESP_LOGI("display_rect:", "painting black for iteration %d %d", i, j);
-    //             }
-    //         if ((i * DISPLAY_HEIGHT + j) % 100 == 0) {
-    //             esp_task_wdt_reset();
-    //         }
-    //     }
-    // }
+    // rectangle should be written the same way as the display sends data to make it more easy
+    // two loops with DISPLAY_WIDTH (250) on the outside and DISPLAY_HEIGHT(122) on the inside 
 
-    // uint8_t hex = 0;
-    // int bitCounter = 0;
-    // int hexCounter = 0;
+    ESP_LOGI("draw_rect:", "setting bits to black");
+    //set bits to black
+    for (int i = 0; i < DISPLAY_WIDTH; i++) {
+        for (int j = 0; j < DISPLAY_HEIGHT; j++) {
+            if (i > xPos && i < xPos + width &&
+                j > yPos && j < yPos + height &&
+                xPos + width <= DISPLAY_WIDTH &&
+                yPos + width <= DISPLAY_HEIGHT) {
+                    bitArray[i][j] = 0; // 0 = black
+                    ESP_LOGI("display_rect:", "painting black for iteration %d %d", i, j);
+                }
+            // if ((i * DISPLAY_HEIGHT + j) % 100 == 0) {
+            //     esp_task_wdt_reset();
+            // }
+        }
+    }
 
-    // ESP_LOGI("draw_rect:", "converting bits to bytes");
-    // //convert bits to bytes 
-    // for (int i = 0; i < DISPLAY_WIDTH; i++) {
-    //     for (int j = 0; j <  DISPLAY_HEIGHT; j++) {
-    //         // gather bytes from rectArray and shift them into hex
+    uint8_t hex = 0;
+    int bitCounter = 0;
+    int hexCounter = 0;
+
+    ESP_LOGI("draw_rect:", "converting bits to bytes");
+    //convert bits to bytes 
+    for (int i = 0; i < DISPLAY_WIDTH; i++) {
+        for (int j = 0; j <  DISPLAY_HEIGHT; j++) {
+            // gather bytes from rectArray and shift them into hex
             
-    //         if (bitArray[i][j] == 0) {
-    //             hex = (hex << 1);
-    //         }
-    //         else {
-    //             hex = (hex << 1) | 1;
-    //         }
-    //         bitCounter++;
+            if (bitArray[i][j] == 0) {
+                hex = (hex << 1);
+            }
+            else {
+                hex = (hex << 1) | 1;
+            }
+            bitCounter++;
             
-    //         // put hex into byteArray
-    //         if (bitCounter == 8) {
-    //             byteArray[hexCounter++] = hex;
-    //             hex = 0xFF;
-    //             bitCounter = 0;
-    //         }
-    //     }
+            // put hex into byteArray
+            if (bitCounter == 8) {
+                byteArray[hexCounter++] = hex;
+                hex = 0xFF;
+                bitCounter = 0;
+            }
+        }
+    }
+
+    // // for remaining bits
+    // if (bitCounter > 0) {
+    //     byteArray[hexCounter] = hex << (8 - bitCounter);
     // }
 
-    // // // for remaining bits
-    // // if (bitCounter > 0) {
-    // //     byteArray[hexCounter] = hex << (8 - bitCounter);
-    // // }
+    int byteArraySize = sizeof(byteArray) / sizeof(byteArray[0]);
 
-    // int byteArraySize = sizeof(byteArray) / sizeof(byteArray[0]);
-
-    // ESP_LOGI("draw_rect:", "sending data");
-    // send_command(0x24);
-    // for (int i = 0; i < byteArraySize; i++) {
-    //     send_data(byteArray[i]);
-    // }
-    // ESP_LOGI("draw_rect:", "size - %d", byteArraySize);
+    ESP_LOGI("draw_rect:", "sending data");
+    send_command(0x24);
+    for (int i = 0; i < byteArraySize; i++) {
+        send_data(byteArray[i]);
+    }
+    ESP_LOGI("draw_rect:", "size - %d", byteArraySize);
     ESP_LOGI("draw_rect:", "done");
 }
 

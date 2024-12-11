@@ -209,7 +209,7 @@ void draw() {
     ESP_LOGI("draw:", "starting...");
     
 
-    draw_rect(30, 50, 20, 20);
+    draw_rect(64, 125, 50, 50);
     // write_image_txt_to_display();
 
     // send_command(0x24);

@@ -38,12 +38,15 @@ void draw_pixel(int x, int y, uint8_t color) {
 void draw_rect(int xPos, int yPos, int width, int height) {
     ESP_LOGI("draw_rect:", "starting...");
 
-    // // set all elements to 1 (white)
-    // for (int i = 0; i < DISPLAY_WIDTH; i++) {
-    //     for (int j = 0; j < DISPLAY_HEIGHT; j++) {
-    //         bitArray[i][j] = 1;
-    //     }
-    // }
+    for (int i = 0; i < DISPLAY_WIDTH; i++) {
+        for (int j = 0; j < DISPLAY_HEIGHT; j++) {
+            if (i > xPos && i < xPos + width &&
+                j > yPos && j < yPos + height)
+                {
+                    draw_pixel(i, j, WHITE);
+                }
+        }
+    }
 
     // // rectangle should be written the same way as the display sends data to make it more easy
     // // two loops with DISPLAY_WIDTH (250) on the outside and DISPLAY_HEIGHT(122) on the inside 

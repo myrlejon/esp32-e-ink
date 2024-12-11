@@ -96,11 +96,11 @@ void display_reset(void) {
 
 void display_clear(void) {
     send_command(0x24); // RAM write command
-    for (int i = 0; i < TOTAL_PIXELS; i++) {
+    for (int i = 0; i < 4000; i++) {
         send_data(0x00); // all black
     }
     send_command(0x24);
-    for (int i = 0; i < TOTAL_PIXELS; i++) {
+    for (int i = 0; i < 4000; i++) {
         send_data(0xFF); // all white
     }
 
@@ -207,8 +207,16 @@ void clear_display() {
 
 void draw() {
     ESP_LOGI("draw:", "starting...");
+    
+
     draw_rect(30, 50, 20, 20);
     // write_image_txt_to_display();
+
+    // send_command(0x24);
+    // send_data(0x00);
+    // send_data(0x00);
+    // send_data(0x00);
+    // send_data(0x00);
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor

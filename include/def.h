@@ -23,3 +23,4 @@ void test(void);
 void draw_rect(int xPos, int yPos, int width, int height);
 void clear_display();
 void draw();
+void draw_pixel(int x, int y, uint8_t color);

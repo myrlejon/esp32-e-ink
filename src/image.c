@@ -13,7 +13,7 @@
 #define WHITE 0xFF
 #define BLACK 0x00
 
-uint8_t byte_array[4000];
+uint8_t byte_array[4096];
 
 // char byteArray[DISPLAY_WIDTH][DISPLAY_HEIGHT];
 // uint8_t byteArray[(250 * 122) / 8] = { 0x00 };
@@ -29,9 +29,9 @@ void draw_pixel(int x, int y, uint8_t color) {
     int bit_offset = bit_index % 8;
 
     if (color == WHITE) {
-        byte_array[byte_index] |= (uint8_t)(1 << bit_offset);
+        byte_array[byte_index] |= (uint8_t)(128 >> bit_offset); // var << innan
     } else {
-        byte_array[byte_index] &= ~((uint8_t)(1 << bit_offset));
+        byte_array[byte_index] &= ~((uint8_t)(128 >> bit_offset)); // var << innan
     }
 } 
 
@@ -40,20 +40,19 @@ void draw_rect(int xPos, int yPos, int width, int height) {
 
     for (int i = 0; i < DISPLAY_WIDTH; i++) {
         for (int j = 0; j < DISPLAY_HEIGHT; j++) {
-            if (i > xPos && i < xPos + width &&
-                j > yPos && j < yPos + height)
+            if (i > xPos && i <= xPos + width &&
+                j > yPos && j <= yPos + height)
                 {
                     draw_pixel(i, j, WHITE);
                     // ESP_LOGI("draw_rect:", "wrote pixel at: x: %d y: %d", i, j);
                 }
         }
     }
-
-    ESP_LOGI("draw_rect:", "sending data");
-    send_command(0x24);
-    for (int i = 0; i < sizeof(byte_array); i++) {
-        send_data(byte_array[i]);
-    }
+    // ESP_LOGI("draw_rect:", "sending data");
+    // send_command(0x24);
+    // for (int i = 0; i < sizeof(byte_array); i++) {
+    //     send_data(byte_array[i]);
+    // }
     // ESP_LOGI("draw_rect:", "done");
 }
 

@@ -96,11 +96,11 @@ void display_reset(void) {
 
 void display_clear(void) {
     send_command(0x24); // RAM write command
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 12000; i++) {
         send_data(0x00); // all black
     }
     send_command(0x24);
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 12000; i++) {
         send_data(0xFF); // all white
     }
 
@@ -210,11 +210,13 @@ void draw() {
     ESP_LOGI("draw:", "starting...");
     
 
+    // förebereder byte_array
     // draw_rect(0, 0, 60, 20);
-    draw_rect(20, 30, 10, 20);
-    draw_rect(50, 50, 40, 50);
-    draw_rect(60, 125, 30, 30);
+    draw_rect(0, 0, 122, 250);
+    // draw_rect(50, 50, 40, 50);
+    // draw_rect(60, 125, 30, 30);
 
+    // här skickas allt in i displayen med en for-loop
     draw_command();
 
 

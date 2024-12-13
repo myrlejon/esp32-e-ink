@@ -96,11 +96,11 @@ void display_reset(void) {
 
 void display_clear(void) {
     send_command(0x24); // RAM write command
-    for (int i = 0; i < 4000; i++) {
+    for (int i = 0; i < 10000; i++) {
         send_data(0x00); // all black
     }
     send_command(0x24);
-    for (int i = 0; i < 4000; i++) {
+    for (int i = 0; i < 10000; i++) {
         send_data(0xFF); // all white
     }
 
@@ -202,6 +202,7 @@ void clear_display() {
     send_command(0x4F); // Y adress
     send_data(0x00); // low byte - 0-255
     send_data(0x00); // high byte - for Y > 255
+
     ESP_LOGI("clear_display", "done");
 }
 
@@ -209,7 +210,14 @@ void draw() {
     ESP_LOGI("draw:", "starting...");
     
 
-    draw_rect(64, 125, 50, 50);
+    // draw_rect(0, 0, 60, 20);
+    draw_rect(20, 30, 10, 20);
+    draw_rect(50, 50, 40, 50);
+    draw_rect(60, 125, 30, 30);
+
+    draw_command();
+
+
     // write_image_txt_to_display();
 
     // send_command(0x24);

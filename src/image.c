@@ -8,16 +8,12 @@
 #include "esp_task_wdt.h"
 
 #define DISPLAY_WIDTH 128 // 122 pixels wide but 122/8 = 15.25, so the last 6 bits are padded therefore 128 is used
-#define DISPLAY_HEIGHT 256
+#define DISPLAY_HEIGHT 250
 
 #define WHITE 0xFF
 #define BLACK 0x00
 
-uint8_t byte_array[4096];
-
-// char byteArray[DISPLAY_WIDTH][DISPLAY_HEIGHT];
-// uint8_t byteArray[(250 * 122) / 8] = { 0x00 };
-// uint8_t byteArray[3813];
+uint8_t byte_array[4000]; // 128 x 250
 
 // set all bits to 1 (white)
 uint8_t bitArray[DISPLAY_WIDTH][DISPLAY_HEIGHT];
@@ -35,31 +31,31 @@ void draw_pixel(int x, int y, uint8_t color) {
     }
 } 
 
-void draw_rect(int xPos, int yPos, int width, int height) {
+void draw_rect(int x_pos, int y_pos, int width, int height) {
     ESP_LOGI("draw_rect:", "starting...");
 
     for (int i = 0; i < DISPLAY_WIDTH; i++) {
         for (int j = 0; j < DISPLAY_HEIGHT; j++) {
-            if (i > xPos && i <= xPos + width &&
-                j > yPos && j <= yPos + height)
+            if (i >= x_pos && i < x_pos + width &&
+                j >= y_pos && j < y_pos + height)
                 {
                     draw_pixel(i, j, WHITE);
-                    // ESP_LOGI("draw_rect:", "wrote pixel at: x: %d y: %d", i, j);
+                    if (i > 120) {
+                        ESP_LOGI("draw_rect:", "wrote pixel at: x: %d y: %d", i, j);
+                    }
                 }
         }
     }
-    // ESP_LOGI("draw_rect:", "sending data");
-    // send_command(0x24);
-    // for (int i = 0; i < sizeof(byte_array); i++) {
-    //     send_data(byte_array[i]);
-    // }
-    // ESP_LOGI("draw_rect:", "done");
 }
 
-void draw_command() {
+void draw_command(bool invert) {
     send_command(0x24);
     for (int i = 0; i < sizeof(byte_array); i++) {
-        send_data(byte_array[i]);
+        if (invert) {
+            send_data(~byte_array[i]);
+        } else {
+            send_data(byte_array[i]);
+        }
     }
 }
 

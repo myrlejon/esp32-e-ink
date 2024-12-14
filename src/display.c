@@ -8,8 +8,6 @@
 // VCC = VCC
 // GND = GND
 
-const uint32_t TOTAL_PIXELS = 30500;
-
 #define PIN_NUM_KEY 12 //KEY
 #define PIN_NUM_SCK 13 //SCK or CLK clock input
 #define PIN_NUM_DIN 14 //DIN or MOSI (master out slave in)
@@ -96,11 +94,11 @@ void display_reset(void) {
 
 void display_clear(void) {
     send_command(0x24); // RAM write command
-    for (int i = 0; i < 12000; i++) {
+    for (int i = 0; i < 10000; i++) {
         send_data(0x00); // all black
     }
     send_command(0x24);
-    for (int i = 0; i < 12000; i++) {
+    for (int i = 0; i < 10000; i++) {
         send_data(0xFF); // all white
     }
 
@@ -208,25 +206,13 @@ void clear_display() {
 
 void draw() {
     ESP_LOGI("draw:", "starting...");
-    
-
     // förebereder byte_array
-    // draw_rect(0, 0, 60, 20);
-    draw_rect(0, 0, 122, 250);
-    // draw_rect(50, 50, 40, 50);
-    // draw_rect(60, 125, 30, 30);
+    draw_rect(0, 0, 60, 20);
+    // draw_rect(0, 0, 122, 250);
+    draw_rect(50, 50, 40, 50);
+    draw_rect(60, 125, 30, 30);
 
-    // här skickas allt in i displayen med en for-loop
-    draw_command();
-
-
-    // write_image_txt_to_display();
-
-    // send_command(0x24);
-    // send_data(0x00);
-    // send_data(0x00);
-    // send_data(0x00);
-    // send_data(0x00);
+    draw_command(false);
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor

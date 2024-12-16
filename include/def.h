@@ -1,5 +1,6 @@
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
+#include "number.h"
 
 // init
 void spi_init(void);
@@ -19,8 +20,10 @@ void load_waveform_lut(void);
 void draw(void);
 void write_image_to_display(void);
 void write_image_txt_to_display(void);
-void draw_rect(int xPos, int yPos, int width, int height);
 void clear_display();
+
+void draw_rect(int xPos, int yPos, int width, int height);
+void draw_number(int number);
 void draw();
 void draw_pixel(int x, int y, uint8_t color);
 void draw_command(bool invert);

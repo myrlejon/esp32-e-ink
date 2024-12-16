@@ -33,7 +33,6 @@ void draw_pixel(int x, int y, uint8_t color) {
 
 void draw_rect(int x_pos, int y_pos, int width, int height) {
     ESP_LOGI("draw_rect:", "starting...");
-
     for (int i = 0; i < DISPLAY_WIDTH; i++) {
         for (int j = 0; j < DISPLAY_HEIGHT; j++) {
             if (i >= x_pos && i < x_pos + width &&

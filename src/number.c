@@ -1,46 +1,42 @@
-#include <stdint.h>
+// define number structs and positions
+#include "esp_log.h"
+#include "def.h"
 
-// active - 1 for being shown, 0 for hidden
-typedef struct {
-    uint8_t active;
-    uint8_t x_pos;
-    uint8_t y_pos;
-    uint8_t width;
-    uint8_t height;
-} Segment;
+uint8_t default_x_pos = 20;
+uint8_t default_y_pos = 10;
 
-typedef struct {
-    Segment a, b, c, d, e, f, g;
-} Segments;
-
-typedef struct {
-    Segments segments;
-} Number;
-
-Number zero = {
+Number seven_segments = {
     .segments = {
-        .a = { .active = 1, .x_pos = 10, .y_pos = 20, .width = 30, .height = 5 },
-        .b = { .active = 1, .x_pos = 40, .y_pos = 25, .width = 5, .height = 25 },
-        .c = { .active = 1, .x_pos = 40, .y_pos = 60, .width = 5, .height = 25 },
-        .d = { .active = 1, .x_pos = 10, .y_pos = 85, .width = 30, .height = 5 },
-        .e = { .active = 1, .x_pos = 5,  .y_pos = 60, .width = 5, .height = 25 },
-        .f = { .active = 1, .x_pos = 5,  .y_pos = 25, .width = 5, .height = 25 },
-        .g = { .active = 0, .x_pos = 10, .y_pos = 50, .width = 30, .height = 5 },
+        .a = {.x_pos = 85, .y_pos = 10, .width = 5, .height = 30 },
+        .b = {.x_pos = 60, .y_pos = 40, .width = 25, .height = 5 },
+        .c = {.x_pos = 25, .y_pos = 40, .width = 25, .height = 5 },
+        .d = {.x_pos = 20, .y_pos = 10, .width = 5, .height = 30 },
+        .e = {.x_pos = 25, .y_pos = 5,  .width = 25, .height = 5 },
+        .f = {.x_pos = 60, .y_pos = 5,  .width = 25, .height = 5 },
+        .g = {.x_pos = 50, .y_pos = 10, .width = 5, .height = 30 },
+    } 
+};
+
+uint8_t active_segments[10][7] = {
+    {1, 1, 1, 1, 1, 1, 0}, // 0
+    {0, 1, 1, 0, 0, 0, 0}, // 1
+    {1, 1, 0, 1, 1, 0, 1}, // 2
+    {1, 1, 1, 1, 0, 0, 1}, // 3
+    {0, 1, 1, 0, 0, 1, 1}, // 4
+    {1, 0, 1, 1, 0, 1, 1}, // 5
+    {1, 0, 1, 1, 1, 1, 1}, // 6
+    {1, 1, 1, 0, 0, 0, 0}, // 7
+    {1, 1, 1, 1, 1, 1, 1}, // 8
+    {1, 1, 1, 1, 0, 1, 1}  // 9
+};
+
+void draw_number(int number) {
+    Segment *segment = &seven_segments.segments.a; // this makes it possible to loop through a-g
+    for (int i = 0; i < sizeof(active_segments[0]); i++)
+    {
+        if (active_segments[number][i] == 1){
+
+            draw_rect(segment[i].x_pos, segment[i].y_pos, segment[i].width, segment[i].height);
+        }
     }
-};
-
-struct Number_1 {
-    
-};
-
-struct Number_2 {
-
-};
-
-struct Number_3 {
-
-};
-
-struct Number_4 {
-
 };

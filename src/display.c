@@ -206,11 +206,8 @@ void clear_display() {
 
 void draw() {
     ESP_LOGI("draw:", "starting...");
-    // förebereder byte_array
-    draw_rect(0, 0, 60, 20);
-    // draw_rect(0, 0, 122, 250);
-    draw_rect(50, 50, 40, 50);
-    draw_rect(60, 125, 30, 30);
+
+    draw_number(4);
 
     draw_command(false);
 

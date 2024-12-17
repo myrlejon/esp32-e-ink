@@ -207,7 +207,11 @@ void clear_display() {
 void draw() {
     ESP_LOGI("draw:", "starting...");
 
-    draw_number(4);
+    draw_number(2, 1);
+    draw_number(4, 2);
+    draw_number(7, 3);
+    draw_number(9, 4);
+    draw_rect(20, 120, 10, 10);
 
     draw_command(false);
 

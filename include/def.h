@@ -23,7 +23,7 @@ void write_image_txt_to_display(void);
 void clear_display();
 
 void draw_rect(int xPos, int yPos, int width, int height);
-void draw_number(int number);
+void draw_number(int number, int position);
 void draw();
 void draw_pixel(int x, int y, uint8_t color);
 void draw_command(bool invert);

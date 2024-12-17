@@ -18,6 +18,9 @@ void app_main() {
     //5. clear display and set RAM
     clear_display();
 
+    // read temperature
+    dht22_read();
+
     // draw on the e-ink display
     draw();
 

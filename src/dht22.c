@@ -17,7 +17,7 @@ uint8_t dht22_read(void) {
     // start signal
     gpio_set_direction(DHT_22_PIN, GPIO_MODE_OUTPUT);
     gpio_set_level(DHT_22_PIN, 0); //pull low for 1ms
-    vTaskDelay(1 / portTICK_PERIOD_MS);
+    esp_rom_delay_us(1000); // vTaskdelay fungerar INTE om du inte har FreeRTOS uppsatt
     gpio_set_level(DHT_22_PIN, 1); // pull high and wait 20-40μs
     esp_rom_delay_us(30);
     gpio_set_direction(DHT_22_PIN, GPIO_MODE_INPUT);

@@ -29,4 +29,4 @@ void draw_pixel(int x, int y, uint8_t color);
 void draw_command(bool invert);
 
 // temp
-uint8_t dht22_read(void);
+uint8_t* dht22_read(void);

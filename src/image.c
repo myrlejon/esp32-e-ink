@@ -47,6 +47,7 @@ void draw_rect(int x_pos, int y_pos, int width, int height) {
     }
 }
 
+// invert to change colors from black/white
 void draw_command(bool invert) {
     send_command(0x24);
     for (int i = 0; i < sizeof(byte_array); i++) {

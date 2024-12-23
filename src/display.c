@@ -207,27 +207,10 @@ void clear_display() {
 void draw() {
     ESP_LOGI("draw:", "starting...");
 
-
-    // TODO: make data[5] global
-
     // read temperature
-    //  = dht22_read();
-    // float temperature = ((data[2] & 0x7F) << 8 | data[3]) * 0.1;
+    dht22_read();
 
-    char buffer[16];
-    snprintf(buffer, sizeof(buffer), "%.1f", temperature);
-
-    int first_digit = buffer[0] - '0';
-    int second_digit = buffer[1] - '0';
-    int decimal_digit = buffer[3] - '0';
-
-    draw_number(first_digit, 1);
-    draw_number(second_digit, 2);
-    draw_number(decimal_digit, 3);
-    draw_number(9, 4);
-    draw_rect(20, 120, 10, 10);
-
-    draw_command(false);
+    draw_command(true);
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor

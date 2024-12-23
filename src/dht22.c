@@ -9,9 +9,8 @@
 #define DHT_22_PIN 32
 #define DHT_22_TIMEOUT 100
 
-uint8_t data[5];
-
-uint8_t* dht22_read(void) {
+void dht22_read(void) {
+    uint8_t dht22_data[5];
 
     // start signal and setup
     gpio_set_direction(DHT_22_PIN, GPIO_MODE_OUTPUT);
@@ -36,23 +35,35 @@ uint8_t* dht22_read(void) {
         uint32_t duration = esp_timer_get_time() - start_time;
 
         // higher than 50µs is a high 1 bit, otherwise low 0 bit.
-        data[i / 8] <<= 1;
+        dht22_data[i / 8] <<= 1;
         if (duration > 50) {
-            data[i / 8] |= 1;
+            dht22_data[i / 8] |= 1;
         }
     }
 
-    if (data[4] != ((data[0] + data[1] + data[2] + data[3]) & 0xFF)) {
+    if (dht22_data[4] != ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3]) & 0xFF)) {
     ESP_LOGI("dht22:", "checksum error");
-    return 0;
+    return;
     }
 
-    float humidity = ((data[0] << 8) | data[1]) * 0.1;
-    float temperature = ((data[2] & 0x7F) << 8 | data[3]) * 0.1;
-    if (data[2] & 0x80) temperature *= -1;  // Negative temperature
+    float humidity = ((dht22_data[0] << 8) | dht22_data[1]) * 0.1;
+    float temperature = ((dht22_data[2] & 0x7F) << 8 | dht22_data[3]) * 0.1;
+    if (dht22_data[2] & 0x80) temperature *= -1;  // Negative temperature
 
     ESP_LOGI("dht22:", "Humidity: %.1f%%", humidity);
     ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature);
 
-    return data;
+    // draw temp on display
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%.1f", temperature);
+
+    int first_digit = buffer[0] - '0';
+    int second_digit = buffer[1] - '0';
+    int decimal_digit = buffer[3] - '0';
+
+    draw_number(first_digit, 1);
+    draw_number(second_digit, 2);
+    draw_rect(20, 120, 10, 10); // dot
+    draw_number(decimal_digit, 3);
 }
+

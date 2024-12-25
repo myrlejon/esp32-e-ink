@@ -220,7 +220,7 @@ void draw() {
 }
 
 // 13.1 - 6. power off 
-void deep_sleep(void) {
+void display_deep_sleep(void) {
     ESP_LOGI("deep sleep", "goodnight");
     send_command(0x10);
     send_data(0x01); // deep sleep mode 1 (se commands 7)

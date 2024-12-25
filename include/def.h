@@ -11,7 +11,7 @@ void display_reset(void);
 void wait_until_idle(void);
 void display_clear(void);
 void display_power_on(void);
-void deep_sleep(void);
+void display_deep_sleep(void);
 void set_init_configuration(void);
 void set_init_code(void);
 void load_waveform_lut(void);
@@ -30,3 +30,6 @@ void draw_command(bool invert);
 
 // temp
 void dht22_read(void);
+
+// mcu
+void mcu_sleep(void);

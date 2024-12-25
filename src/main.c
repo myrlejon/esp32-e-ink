@@ -22,5 +22,8 @@ void app_main() {
     draw();
 
     //6. power off (deep sleep)
-    deep_sleep();
+    display_deep_sleep();
+
+    // put MCU to sleep
+    // mcu_sleep();
 }

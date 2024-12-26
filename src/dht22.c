@@ -41,9 +41,11 @@ void dht22_read(void) {
         }
     }
 
+    // esp_rom_delay_us(1000000);
+
     if (dht22_data[4] != ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3]) & 0xFF)) {
-    ESP_LOGI("dht22:", "checksum error");
-    return;
+        ESP_LOGI("dht22:", "checksum error");
+        return;
     }
 
     float humidity = ((dht22_data[0] << 8) | dht22_data[1]) * 0.1;
@@ -52,6 +54,8 @@ void dht22_read(void) {
 
     ESP_LOGI("dht22:", "Humidity: %.1f%%", humidity);
     ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature);
+
+    // dht22_reset();
 
     // draw temp on display
     char buffer[16];
@@ -65,5 +69,14 @@ void dht22_read(void) {
     draw_number(second_digit, 2);
     draw_rect(20, 120, 10, 10); // dot
     draw_number(decimal_digit, 3);
+}
+
+void dht22_reset(void) {
+    // Assume the DHT22 is connected to a GPIO pin
+    gpio_set_direction(DHT_22_PIN, GPIO_MODE_OUTPUT);
+    gpio_set_level(DHT_22_PIN, 0); // Pull low to reset the sensor
+    esp_rom_delay_us(1000); // Hold for 1 ms
+    gpio_set_level(DHT_22_PIN, 1); // Pull high
+    gpio_set_direction(DHT_22_PIN, GPIO_MODE_INPUT); // Restore as input
 }
 

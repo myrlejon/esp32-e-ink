@@ -25,5 +25,5 @@ void app_main() {
     display_deep_sleep();
 
     // put MCU to sleep
-    // mcu_sleep();
+    mcu_sleep();
 }

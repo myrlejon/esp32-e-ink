@@ -65,10 +65,16 @@ void dht22_read(void) {
     int second_digit = buffer[1] - '0';
     int decimal_digit = buffer[3] - '0';
 
-    draw_number(first_digit, 1);
-    draw_number(second_digit, 2);
-    draw_rect(20, 120, 10, 10); // dot
-    draw_number(decimal_digit, 3);
+    // draw_small_number(first_digit, 1);
+    // draw_rect(20, 120, 10, 10); // dot
+    // draw_small_number(second_digit, 2);
+    // draw_small_number(decimal_digit, 3);
+
+
+    draw_small_number(first_digit, 1);
+    draw_small_number(second_digit, 2);
+    // draw_rect(20, 120, 10, 10); // dot
+    draw_small_number(decimal_digit, 3);
 }
 
 void dht22_reset(void) {

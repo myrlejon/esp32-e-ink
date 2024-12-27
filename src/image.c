@@ -60,17 +60,17 @@ void draw_command(bool invert) {
 }
 
 // image gets inverted (negative) pixels, probably a little/big endian problem in the python script
-void write_image_txt_to_display(void) {
+void write_image_txt_to_display(bool invert) {
     send_command(0x24);
     int imageArraySize = sizeof(image_array) / sizeof(image_array[0]);
 
     ESP_LOGI("image info:", "array size: %d", imageArraySize);
-    ESP_LOGI("test", "%d", image_array[1]);
 
     for (int i = 0; i < imageArraySize; i++) {
-        if (i % 100 == 0) {
-            ESP_LOGI("image info:", "0x%02X", image_array[i]);
+        if (invert) {
+            send_data(~image_array[i]);
+        } else {
+            send_data(image_array[i]);
         }
-        send_data(image_array[i]);
     }
 }

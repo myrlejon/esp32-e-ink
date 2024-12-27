@@ -207,6 +207,9 @@ void clear_display() {
 void draw() {
     ESP_LOGI("draw:", "starting...");
 
+    // draw frame
+    // write_image_txt_to_display(true);
+
     // read temperature
     dht22_read();
 

@@ -17,7 +17,7 @@ void dht22_read(void) {
     gpio_set_level(DHT_22_PIN, 0); //pull low for 1ms
     esp_rom_delay_us(1000); // vTaskdelay fungerar INTE om du inte har FreeRTOS uppsatt
     gpio_set_level(DHT_22_PIN, 1); // pull high and wait 20-40μs
-    esp_rom_delay_us(30);
+    esp_rom_delay_us(40);
     gpio_set_direction(DHT_22_PIN, GPIO_MODE_INPUT);
 
     if (gpio_get_level(DHT_22_PIN) == 1) {
@@ -58,12 +58,31 @@ void dht22_read(void) {
     // dht22_reset();
 
     // draw temp on display
-    char buffer[16];
-    snprintf(buffer, sizeof(buffer), "%.1f", temperature);
+    char temp_buffer[16];
+    snprintf(temp_buffer, sizeof(temp_buffer), "%.1f", temperature);
 
-    int first_digit = buffer[0] - '0';
-    int second_digit = buffer[1] - '0';
-    int decimal_digit = buffer[3] - '0';
+    int temp_first_digit = temp_buffer[0] - '0';
+    int temp_second_digit = temp_buffer[1] - '0';
+    int temp_decimal_digit = temp_buffer[3] - '0';
+
+    // temp
+    draw_small_number(temp_first_digit, 1, 50, 45);
+    draw_small_number(temp_second_digit, 2, 50, 45);
+    draw_rect(55, 78, 2, 2); // dot
+    draw_small_number(temp_decimal_digit, 3, 50, 45);
+
+    char hum_buffer[16];
+    snprintf(hum_buffer, sizeof(hum_buffer), "%.1f", humidity);
+
+    int hum_first_digit = hum_buffer[0] - '0';
+    int hum_second_digit = hum_buffer[1] - '0';
+    int hum_decimal_digit = hum_buffer[3] - '0';
+
+    // humidity
+    draw_small_number(hum_first_digit, 1, 10, 45);
+    draw_small_number(hum_second_digit, 2, 10, 45);
+    draw_rect(25, 78, 2, 2); // dot
+    draw_small_number(hum_decimal_digit, 3, 10, 45);
 
     // draw_small_number(first_digit, 1);
     // draw_rect(20, 120, 10, 10); // dot
@@ -71,10 +90,12 @@ void dht22_read(void) {
     // draw_small_number(decimal_digit, 3);
 
 
-    draw_small_number(first_digit, 1);
-    draw_small_number(second_digit, 2);
-    // draw_rect(20, 120, 10, 10); // dot
-    draw_small_number(decimal_digit, 3);
+    // draw_small_number(first_digit, 1);
+    // draw_small_number(second_digit, 2);
+    // // draw_rect(20, 120, 10, 10); // dot
+    // draw_small_number(decimal_digit, 3);
+
+
 }
 
 void dht22_reset(void) {

@@ -207,13 +207,13 @@ void clear_display() {
 void draw() {
     ESP_LOGI("draw:", "starting...");
 
-    // draw frame
-    // write_image_txt_to_display(true);
-
     // read temperature
     dht22_read();
 
-    draw_command(true);
+    // draw frame
+    write_image_txt_to_display(true);
+
+    // draw_command(true);
 
     send_command(0x22);  // load waveform from OTP command
     send_data(0xF7); // 0xF7 does 0xC7 but with temp sensor

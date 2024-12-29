@@ -17,15 +17,16 @@ Number large_seven_segments = {
     } 
 };
 
+// 1/4 size of large
 Number small_seven_segments = {
     .segments = {
-        .a = {.x_pos = 40, .y_pos = 18, .width = 2, .height = 15 },
-        .b = {.x_pos = 28, .y_pos = 33, .width = 12, .height = 2 },
-        .c = {.x_pos = 13, .y_pos = 33, .width = 12, .height = 2 },
-        .d = {.x_pos = 10, .y_pos = 18, .width = 2, .height = 15 },
-        .e = {.x_pos = 13, .y_pos = 15, .width = 12, .height = 2 },
-        .f = {.x_pos = 28, .y_pos = 15, .width = 12, .height = 2 },
-        .g = {.x_pos = 25, .y_pos = 18, .width = 2, .height = 15 },
+        .a = {.x_pos = 20, .y_pos = 9, .width = 1, .height = 7 },
+        .b = {.x_pos = 14, .y_pos = 16, .width = 6, .height = 1 },
+        .c = {.x_pos = 7, .y_pos = 16, .width = 6, .height = 1 },
+        .d = {.x_pos = 5, .y_pos = 9, .width = 1, .height = 7 },
+        .e = {.x_pos = 7, .y_pos = 7, .width = 6, .height = 1 },
+        .f = {.x_pos = 14, .y_pos = 7, .width = 6, .height = 1 },
+        .g = {.x_pos = 12, .y_pos = 9, .width = 1, .height = 7 },
     } 
 };
 
@@ -43,8 +44,7 @@ uint8_t active_segments[10][7] = {
     {1, 1, 1, 1, 0, 1, 1}  // 9
 };
 
-void draw_small_number(int number, int position) {
-
+void draw_small_number(int number, int position, int x_start_pos, int y_start_pos) {
     int y_offset = 0;
 
     switch (position)
@@ -53,13 +53,13 @@ void draw_small_number(int number, int position) {
         case 1:
             break;
         case 2:
-            y_offset = 25;
+            y_offset = 13;
             break;
         case 3:
-            y_offset = 60;
+            y_offset = 30;
             break;
         case 4: 
-            y_offset = 80;
+            y_offset = 42;
             break;
         default:
             break;
@@ -69,7 +69,7 @@ void draw_small_number(int number, int position) {
     for (int i = 0; i < sizeof(active_segments[0]); i++)
     {
         if (active_segments[number][i] == 1){
-            draw_rect(segment[i].x_pos, segment[i].y_pos + y_offset, segment[i].width, segment[i].height);
+            draw_rect(segment[i].x_pos + x_start_pos, segment[i].y_pos + y_start_pos + y_offset, segment[i].width, segment[i].height);
         }
     }
 };

@@ -2,6 +2,11 @@
 #include "driver/gpio.h"
 #include "number.h"
 
+// config
+
+// write on blank canvas, configure ARRAY_TYPE = 0. write on rendered image, configure ARRAY_TYPE = 1;
+#define ARRAY_TYPE 1
+
 // init
 void spi_init(void);
 void gpio_init(void);
@@ -23,7 +28,7 @@ void clear_display();
 
 void draw_rect(int xPos, int yPos, int width, int height);
 void draw_large_number(int number, int position);
-void draw_small_number(int number, int position);
+void draw_small_number(int number, int position, int x_start_pos, int y_start_pos);
 void draw();
 void draw_pixel(int x, int y, uint8_t color);
 void draw_command(bool invert);

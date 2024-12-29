@@ -19,15 +19,28 @@ uint8_t byte_array[4000]; // 128 x 250
 uint8_t bitArray[DISPLAY_WIDTH][DISPLAY_HEIGHT];
 // memset(bitArray, 1, sizeof(bitArray));
 
+// array_type is to choose between byte_array (blank canvas) and image_array (rendered image)
 void draw_pixel(int x, int y, uint8_t color) {
     int bit_index = (y * DISPLAY_WIDTH) + x;
     int byte_index = bit_index / 8;
     int bit_offset = bit_index % 8;
 
-    if (color == WHITE) {
-        byte_array[byte_index] |= (uint8_t)(128 >> bit_offset); // var << innan
-    } else {
-        byte_array[byte_index] &= ~((uint8_t)(128 >> bit_offset)); // var << innan
+    // ARRAY_TYPE = 0 - byte_array
+    if (ARRAY_TYPE == 0) {
+        if (color == WHITE) {
+            byte_array[byte_index] |= (uint8_t)(128 >> bit_offset); // var << innan
+        } else {
+            byte_array[byte_index] &= ~((uint8_t)(128 >> bit_offset)); // var << innan
+        }
+    }
+    
+    // ARRAY_TYPE = 1 - image_array
+    if (ARRAY_TYPE == 1) {
+        if (color == WHITE) {
+            image_array[byte_index] |= (uint8_t)(128 >> bit_offset); 
+        } else {
+            image_array[byte_index] &= ~((uint8_t)(128 >> bit_offset));
+        }
     }
 } 
 

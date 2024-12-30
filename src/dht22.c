@@ -81,7 +81,7 @@ void dht22_read(void) {
     // humidity
     draw_small_number(hum_first_digit, 1, 10, 45);
     draw_small_number(hum_second_digit, 2, 10, 45);
-    draw_rect(25, 78, 2, 2); // dot
+    draw_rect(15, 78, 2, 2); // dot
     draw_small_number(hum_decimal_digit, 3, 10, 45);
 
     // draw_small_number(first_digit, 1);

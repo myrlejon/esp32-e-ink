@@ -35,7 +35,7 @@ void draw_command(bool invert);
 
 // temp
 void dht22_read(void);
-void dht22_reset(void);
+void record_temp(int current_temp);
 
 // mcu
 void mcu_sleep(void);

@@ -5,6 +5,9 @@
 #include "driver/gpio.h"
 #include <stdio.h>
 #include "esp_timer.h"
+#include <time.h>
+#include "nvs_flash.h"
+#include "nvs.h"
 
 #define DHT_22_PIN 32
 #define DHT_22_TIMEOUT 100
@@ -55,8 +58,6 @@ void dht22_read(void) {
     ESP_LOGI("dht22:", "Humidity: %.1f%%", humidity);
     ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature);
 
-    // dht22_reset();
-
     // draw temp on display
     char temp_buffer[16];
     snprintf(temp_buffer, sizeof(temp_buffer), "%.1f", temperature);
@@ -84,26 +85,75 @@ void dht22_read(void) {
     draw_rect(15, 78, 2, 2); // dot
     draw_small_number(hum_decimal_digit, 3, 10, 45);
 
-    // draw_small_number(first_digit, 1);
-    // draw_rect(20, 120, 10, 10); // dot
-    // draw_small_number(second_digit, 2);
-    // draw_small_number(decimal_digit, 3);
-
-
-    // draw_small_number(first_digit, 1);
-    // draw_small_number(second_digit, 2);
-    // // draw_rect(20, 120, 10, 10); // dot
-    // draw_small_number(decimal_digit, 3);
-
-
+    record_temp(10);
 }
 
-void dht22_reset(void) {
-    // Assume the DHT22 is connected to a GPIO pin
-    gpio_set_direction(DHT_22_PIN, GPIO_MODE_OUTPUT);
-    gpio_set_level(DHT_22_PIN, 0); // Pull low to reset the sensor
-    esp_rom_delay_us(1000); // Hold for 1 ms
-    gpio_set_level(DHT_22_PIN, 1); // Pull high
-    gpio_set_direction(DHT_22_PIN, GPIO_MODE_INPUT); // Restore as input
-}
+// gets the highest/lowest temp from the past 24 hours
+void record_temp(int current_temp) {
 
+    // https://github.com/espressif/esp-idf/blob/master/examples/storage/nvs_rw_value/main/nvs_value_example_main.c
+    // Initialize NVS
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        // NVS partition was truncated and needs to be erased
+        // Retry nvs_flash_init
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        err = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK( err );
+
+    // Open
+    ESP_LOGI("record_temp", "opening NVS handle...");
+    nvs_handle_t handle;
+    err = nvs_open("storage", NVS_READWRITE, &handle);
+    if (err != ESP_OK) {
+        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+    } else {
+        printf("Done\n");
+
+        // Read
+        printf("Reading restart counter from NVS ... ");
+        int32_t restart_counter = 0; // value will default to 0, if not set yet in NVS
+        err = nvs_get_i32(handle, "restart_counter", &restart_counter);
+        switch (err) {
+            case ESP_OK:
+                printf("Done\n");
+                printf("Restart counter = %" PRIu32 "\n", restart_counter);
+                break;
+            case ESP_ERR_NVS_NOT_FOUND:
+                printf("The value is not initialized yet!\n");
+                break;
+            default :
+                printf("Error (%s) reading!\n", esp_err_to_name(err));
+        }
+
+        // Write
+        printf("Updating restart counter in NVS ... ");
+        restart_counter++;
+        err = nvs_set_i32(handle, "restart_counter", restart_counter);
+        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+
+        // Commit written value.
+        // After setting any values, nvs_commit() must be called to ensure changes are written
+        // to flash storage. Implementations may write to storage at other times,
+        // but this is not guaranteed.
+        printf("Committing updates in NVS ... ");
+        err = nvs_commit(handle);
+        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+
+        // Close
+        nvs_close(handle);
+    }
+
+    nvs_handle_t nvs_handle;
+    nvs_open("temp_storage", NVS_READWRITE, &nvs_handle);
+    nvs_set_i32(nvs_handle, "current_value", current_temp);
+    nvs_commit(nvs_handle);
+
+
+    int highest_temp = 0;
+    nvs_get_i32(nvs_handle, "current_value", &highest_temp);
+
+    // time_t now = time(NULL);
+    ESP_LOGI("record_temp", "current temp - %d", highest_temp);
+}

@@ -35,7 +35,7 @@ void draw_command(bool invert);
 
 // temp
 void dht22_read(void);
-void record_temp(int current_temp);
+int read_write_nvs(const char* key, int value, const char* storage);
 
 // mcu
 void mcu_sleep(void);

@@ -58,6 +58,12 @@ void dht22_read(void) {
     ESP_LOGI("dht22:", "Humidity: %.1f%%", humidity);
     ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature);
 
+    // save temp and humidity to nvs
+    int value = read_write_nvs("temperature", temperature, "storage");
+    ESP_LOGI("adwadawd", "value - %d", value);
+
+
+
     // draw temp on display
     char temp_buffer[16];
     snprintf(temp_buffer, sizeof(temp_buffer), "%.1f", temperature);
@@ -84,13 +90,10 @@ void dht22_read(void) {
     draw_small_number(hum_second_digit, 2, 10, 45);
     draw_rect(15, 78, 2, 2); // dot
     draw_small_number(hum_decimal_digit, 3, 10, 45);
-
-    record_temp(10);
 }
 
-// gets the highest/lowest temp from the past 24 hours
-void record_temp(int current_temp) {
-
+// reads (return) and writes (with parameters) from key value pairs
+int read_write_nvs(const char* key, int value, const char* storage) {
     // https://github.com/espressif/esp-idf/blob/master/examples/storage/nvs_rw_value/main/nvs_value_example_main.c
     // Initialize NVS
     esp_err_t err = nvs_flash_init();
@@ -103,57 +106,45 @@ void record_temp(int current_temp) {
     ESP_ERROR_CHECK( err );
 
     // Open
-    ESP_LOGI("record_temp", "opening NVS handle...");
+    ESP_LOGI("read_write_nvs", "opening NVS handle...");
     nvs_handle_t handle;
-    err = nvs_open("storage", NVS_READWRITE, &handle);
+    err = nvs_open(storage, NVS_READWRITE, &handle);
     if (err != ESP_OK) {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        ESP_LOGI("read_write_nvs", "unable to open storage");
     } else {
-        printf("Done\n");
+        ESP_LOGI("read_write_nvs", "opened storage");
 
         // Read
-        printf("Reading restart counter from NVS ... ");
-        int32_t restart_counter = 0; // value will default to 0, if not set yet in NVS
-        err = nvs_get_i32(handle, "restart_counter", &restart_counter);
+        ESP_LOGI("read_write_nvs", "reading value from nvs...");
+        int stored_value = 0;
+        err = nvs_get_i32(handle, key, stored_value);
         switch (err) {
             case ESP_OK:
-                printf("Done\n");
-                printf("Restart counter = %" PRIu32 "\n", restart_counter);
+                ESP_LOGI("read_write_nvs", "done");
+                ESP_LOGI("read_write_nvs", "value = %d", value);
                 break;
             case ESP_ERR_NVS_NOT_FOUND:
-                printf("The value is not initialized yet!\n");
+                ESP_LOGI("read_write_nvs", "value is not initialized yet");
                 break;
             default :
-                printf("Error (%s) reading!\n", esp_err_to_name(err));
+                ESP_LOGI("read_write_nvs", "error (%s) reading", esp_err_to_name(err));
         }
 
         // Write
-        printf("Updating restart counter in NVS ... ");
-        restart_counter++;
-        err = nvs_set_i32(handle, "restart_counter", restart_counter);
-        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+        ESP_LOGI("read_write_nvs", "updating restart ocunter in nvs...");
+        err = nvs_set_i32(handle, "restart_counter", value);
+        ESP_LOGI("read_write_nvs", "%s", (err != ESP_OK ? "failed" : "done"));
 
         // Commit written value.
         // After setting any values, nvs_commit() must be called to ensure changes are written
         // to flash storage. Implementations may write to storage at other times,
         // but this is not guaranteed.
-        printf("Committing updates in NVS ... ");
+        ESP_LOGI("read_write_nvs", "committing value...");
         err = nvs_commit(handle);
-        printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+        ESP_LOGI("read_write_nvs", "%s", (err != ESP_OK ? "failed" : "done"));
 
         // Close
         nvs_close(handle);
     }
-
-    nvs_handle_t nvs_handle;
-    nvs_open("temp_storage", NVS_READWRITE, &nvs_handle);
-    nvs_set_i32(nvs_handle, "current_value", current_temp);
-    nvs_commit(nvs_handle);
-
-
-    int highest_temp = 0;
-    nvs_get_i32(nvs_handle, "current_value", &highest_temp);
-
-    // time_t now = time(NULL);
-    ESP_LOGI("record_temp", "current temp - %d", highest_temp);
+    return value;
 }

@@ -59,8 +59,10 @@ void dht22_read(void) {
     ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature);
 
     // save temp and humidity to nvs
-    int value = read_write_nvs("temperature", temperature, "storage");
-    ESP_LOGI("adwadawd", "value - %d", value);
+    int restart_count = read_write_nvs("restart_count", -1, "storage");
+    ESP_LOGI("awdawdwadaw", "restart count - %d", restart_count);
+    // int value = read_write_nvs("temperature", temperature, "storage");
+    // ESP_LOGI("adwadawd", "value - %d", value);
 
 
 
@@ -90,61 +92,4 @@ void dht22_read(void) {
     draw_small_number(hum_second_digit, 2, 10, 45);
     draw_rect(15, 78, 2, 2); // dot
     draw_small_number(hum_decimal_digit, 3, 10, 45);
-}
-
-// reads (return) and writes (with parameters) from key value pairs
-int read_write_nvs(const char* key, int value, const char* storage) {
-    // https://github.com/espressif/esp-idf/blob/master/examples/storage/nvs_rw_value/main/nvs_value_example_main.c
-    // Initialize NVS
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        // NVS partition was truncated and needs to be erased
-        // Retry nvs_flash_init
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( err );
-
-    // Open
-    ESP_LOGI("read_write_nvs", "opening NVS handle...");
-    nvs_handle_t handle;
-    err = nvs_open(storage, NVS_READWRITE, &handle);
-    if (err != ESP_OK) {
-        ESP_LOGI("read_write_nvs", "unable to open storage");
-    } else {
-        ESP_LOGI("read_write_nvs", "opened storage");
-
-        // Read
-        ESP_LOGI("read_write_nvs", "reading value from nvs...");
-        int stored_value = 0;
-        err = nvs_get_i32(handle, key, stored_value);
-        switch (err) {
-            case ESP_OK:
-                ESP_LOGI("read_write_nvs", "done");
-                ESP_LOGI("read_write_nvs", "value = %d", value);
-                break;
-            case ESP_ERR_NVS_NOT_FOUND:
-                ESP_LOGI("read_write_nvs", "value is not initialized yet");
-                break;
-            default :
-                ESP_LOGI("read_write_nvs", "error (%s) reading", esp_err_to_name(err));
-        }
-
-        // Write
-        ESP_LOGI("read_write_nvs", "updating restart ocunter in nvs...");
-        err = nvs_set_i32(handle, "restart_counter", value);
-        ESP_LOGI("read_write_nvs", "%s", (err != ESP_OK ? "failed" : "done"));
-
-        // Commit written value.
-        // After setting any values, nvs_commit() must be called to ensure changes are written
-        // to flash storage. Implementations may write to storage at other times,
-        // but this is not guaranteed.
-        ESP_LOGI("read_write_nvs", "committing value...");
-        err = nvs_commit(handle);
-        ESP_LOGI("read_write_nvs", "%s", (err != ESP_OK ? "failed" : "done"));
-
-        // Close
-        nvs_close(handle);
-    }
-    return value;
 }

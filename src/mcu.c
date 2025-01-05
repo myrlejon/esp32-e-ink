@@ -8,7 +8,7 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 
-#define SLEEP_TIME 15 // minutes
+#define SLEEP_TIME 1 // minutes
 
 void mcu_sleep(void) {
     // esp_sleep_enable_timer_wakeup(SLEEP_TIME * 60 * 1000000); // minutes * seconds * 10^6 (convert microseconds > seconds)

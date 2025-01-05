@@ -20,7 +20,7 @@ void dht22_read(void) {
     gpio_set_level(DHT_22_PIN, 0); //pull low for 1ms
     esp_rom_delay_us(1000); // vTaskdelay fungerar INTE om du inte har FreeRTOS uppsatt
     gpio_set_level(DHT_22_PIN, 1); // pull high and wait 20-40μs
-    esp_rom_delay_us(40);
+    esp_rom_delay_us(30);
     gpio_set_direction(DHT_22_PIN, GPIO_MODE_INPUT);
 
     if (gpio_get_level(DHT_22_PIN) == 1) {
@@ -28,7 +28,6 @@ void dht22_read(void) {
     } else {
         ESP_LOGI("dht22:", "response!");
     }
-
 
     for (int i = 0; i < 40; i++) {
         while (gpio_get_level(DHT_22_PIN) == 0);  // wait for low
@@ -43,12 +42,12 @@ void dht22_read(void) {
             dht22_data[i / 8] |= 1;
         }
     }
-
+    
     // esp_rom_delay_us(1000000);
 
     if (dht22_data[4] != ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3]) & 0xFF)) {
         ESP_LOGI("dht22:", "checksum error");
-        return;
+        // return;
     }
 
     float humidity = ((dht22_data[0] << 8) | dht22_data[1]) * 0.1;
@@ -56,14 +55,13 @@ void dht22_read(void) {
     if (dht22_data[2] & 0x80) temperature *= -1;  // Negative temperature
 
     ESP_LOGI("dht22:", "Humidity: %.1f%%", humidity);
-    ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature);
+    ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature); // sometimes logs exactly HALF of the temp/humidity upon restart, but why? one of the bits gone perhaps?
 
+
+    // TODO
     // save temp and humidity to nvs
-    int restart_count = read_write_nvs("restart_count", -1, "storage");
-    ESP_LOGI("awdawdwadaw", "restart count - %d", restart_count);
+    // int restart_count = read_write_nvs("restart_count", -1, "storage");
     // int value = read_write_nvs("temperature", temperature, "storage");
-    // ESP_LOGI("adwadawd", "value - %d", value);
-
 
 
     // draw temp on display

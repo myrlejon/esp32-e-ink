@@ -15,12 +15,13 @@
 void dht22_read(void) {
     uint8_t dht22_data[5];
 
+    // total of 5 retries
     // start signal and setup
     gpio_set_direction(DHT_22_PIN, GPIO_MODE_OUTPUT);
     gpio_set_level(DHT_22_PIN, 0); //pull low for 1ms
     esp_rom_delay_us(1000); // vTaskdelay fungerar INTE om du inte har FreeRTOS uppsatt
     gpio_set_level(DHT_22_PIN, 1); // pull high and wait 20-40μs
-    esp_rom_delay_us(30);
+    esp_rom_delay_us(40);
     gpio_set_direction(DHT_22_PIN, GPIO_MODE_INPUT);
 
     if (gpio_get_level(DHT_22_PIN) == 1) {
@@ -28,6 +29,8 @@ void dht22_read(void) {
     } else {
         ESP_LOGI("dht22:", "response!");
     }
+
+    // esp_rom_delay_us(160);
 
     for (int i = 0; i < 40; i++) {
         while (gpio_get_level(DHT_22_PIN) == 0);  // wait for low
@@ -42,13 +45,15 @@ void dht22_read(void) {
             dht22_data[i / 8] |= 1;
         }
     }
-    
-    // esp_rom_delay_us(1000000);
 
     if (dht22_data[4] != ((dht22_data[0] + dht22_data[1] + dht22_data[2] + dht22_data[3]) & 0xFF)) {
         ESP_LOGI("dht22:", "checksum error");
-        // return;
+        ESP_LOGI("dht22:", "retrying!");
+    } else {
+        ESP_LOGI("dht22:", "correct checksum");
     }
+    
+    // esp_rom_delay_us(1000000);
 
     float humidity = ((dht22_data[0] << 8) | dht22_data[1]) * 0.1;
     float temperature = ((dht22_data[2] & 0x7F) << 8 | dht22_data[3]) * 0.1;
@@ -56,6 +61,11 @@ void dht22_read(void) {
 
     ESP_LOGI("dht22:", "Humidity: %.1f%%", humidity);
     ESP_LOGI("dht22:", "Temperature: %.1f°C", temperature); // sometimes logs exactly HALF of the temp/humidity upon restart, but why? one of the bits gone perhaps?
+    ESP_LOGI("dht22:", "dht22_data[0] - %d", dht22_data[0]);
+    ESP_LOGI("dht22:", "dht22_data[1] - %d", dht22_data[1]);
+    ESP_LOGI("dht22:", "dht22_data[2] - %d", dht22_data[2]);
+    ESP_LOGI("dht22:", "dht22_data[3] - %d", dht22_data[3]);
+
 
 
     // TODO
@@ -71,6 +81,26 @@ void dht22_read(void) {
     int temp_first_digit = temp_buffer[0] - '0';
     int temp_second_digit = temp_buffer[1] - '0';
     int temp_decimal_digit = temp_buffer[3] - '0';
+
+    int highest_temp_1 = read_write_nvs("highest_temp_1", -1, "storage");
+    int highest_temp_2 = read_write_nvs("highest_temp_2", -1, "storage");
+    int highest_temp_3 = read_write_nvs("highest_temp_3", -1, "storage");
+
+    float highest_temp = (highest_temp_1 * 10) + highest_temp_2 + (highest_temp_3 / 10.0f);
+
+    if (temperature > highest_temp) {
+        highest_temp_1 = read_write_nvs("highest_temp_1", temp_first_digit, "storage");
+        highest_temp_2 = read_write_nvs("highest_temp_2", temp_second_digit, "storage");
+        highest_temp_3 = read_write_nvs("highest_temp_3", temp_decimal_digit, "storage");
+        ESP_LOGI("dht22:", "writing highest temp - %.1f", highest_temp);
+
+        draw_small_number(temp_first_digit, 1, 50, 45);
+        draw_small_number(temp_second_digit, 2, 50, 45);
+        draw_rect(55, 78, 2, 2); // dot
+        draw_small_number(temp_decimal_digit, 3, 50, 45);
+    }
+    ESP_LOGI("dht22:", "highest temp %d%d.%d", highest_temp_1, highest_temp_2, highest_temp_3);
+
 
     // temp
     draw_small_number(temp_first_digit, 1, 50, 45);

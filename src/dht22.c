@@ -108,6 +108,14 @@ void dht22_read(void) {
     draw_rect(55, 78, 2, 2); // dot
     draw_small_number(temp_decimal_digit, 3, 50, 45);
 
+    draw_small_number(highest_temp_1, 1, 50, 117);
+    draw_small_number(highest_temp_2, 2, 50, 117);
+    draw_rect(55, 150, 2, 2); // dot
+    draw_small_number(highest_temp_3, 3, 50, 117);
+
+    // record temp
+    
+
     char hum_buffer[16];
     snprintf(hum_buffer, sizeof(hum_buffer), "%.1f", humidity);
 

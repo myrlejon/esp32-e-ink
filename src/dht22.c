@@ -77,29 +77,66 @@ void dht22_read(void) {
     // draw temp on display
     char temp_buffer[16];
     snprintf(temp_buffer, sizeof(temp_buffer), "%.1f", temperature);
+    char hum_buffer[16];
+    snprintf(hum_buffer, sizeof(hum_buffer), "%.1f", humidity);
 
     int temp_first_digit = temp_buffer[0] - '0';
     int temp_second_digit = temp_buffer[1] - '0';
     int temp_decimal_digit = temp_buffer[3] - '0';
 
-    int highest_temp_1 = read_write_nvs("highest_temp_1", -1, "storage");
-    int highest_temp_2 = read_write_nvs("highest_temp_2", -1, "storage");
-    int highest_temp_3 = read_write_nvs("highest_temp_3", -1, "storage");
+    int hum_first_digit = hum_buffer[0] - '0';
+    int hum_second_digit = hum_buffer[1] - '0';
+    int hum_decimal_digit = hum_buffer[3] - '0';
 
-    float highest_temp = (highest_temp_1 * 10) + highest_temp_2 + (highest_temp_3 / 10.0f);
+    int highest_temp_first_digit = read_write_nvs("highest_temp_1", 2, "storage");
+    int highest_temp_second_digit = read_write_nvs("highest_temp_second_digit", 2, "storage");
+    int highest_temp_decimal_digit = read_write_nvs("highest_temp_decimal_digit", 4, "storage");
+
+    float highest_temp = (highest_temp_first_digit * 10) + highest_temp_second_digit + (highest_temp_decimal_digit / 10.0f);
 
     if (temperature > highest_temp) {
-        highest_temp_1 = read_write_nvs("highest_temp_1", temp_first_digit, "storage");
-        highest_temp_2 = read_write_nvs("highest_temp_2", temp_second_digit, "storage");
-        highest_temp_3 = read_write_nvs("highest_temp_3", temp_decimal_digit, "storage");
-        ESP_LOGI("dht22:", "writing highest temp - %.1f", highest_temp);
-
-        draw_small_number(temp_first_digit, 1, 50, 45);
-        draw_small_number(temp_second_digit, 2, 50, 45);
-        draw_rect(55, 78, 2, 2); // dot
-        draw_small_number(temp_decimal_digit, 3, 50, 45);
+        highest_temp_first_digit = read_write_nvs("highest_temp_first_digit", temp_first_digit, "storage");
+        highest_temp_second_digit = read_write_nvs("highest_temp_second_digit", temp_second_digit, "storage");
+        highest_temp_decimal_digit = read_write_nvs("highest_temp_decimal_digit", temp_decimal_digit, "storage");
     }
-    ESP_LOGI("dht22:", "highest temp %d%d.%d", highest_temp_1, highest_temp_2, highest_temp_3);
+
+    // int lowest_temp_first_digit = read_write_nvs("lowest_temp_first_digit", -1, "storage");
+    // int lowest_temp_second_digit = read_write_nvs("lowest_temp_second_digit", -1, "storage");
+    // int lowest_temp_decimal_digit = read_write_nvs("lowest_temp_decimal_digit", -1, "storage");
+
+    // float lowest_temp = (lowest_temp_first_digit * 10) + lowest_temp_second_digit + (lowest_temp_decimal_digit / 10.0f);
+
+    // if (temperature < lowest_temp) {
+    //     lowest_temp_first_digit = read_write_nvs("lowest_temp_first_digit", temp_first_digit, "storage");
+    //     lowest_temp_second_digit = read_write_nvs("lowest_temp_second_digit", temp_second_digit, "storage");
+    //     lowest_temp_decimal_digit = read_write_nvs("lowest_temp_decimal_digit", temp_decimal_digit, "storage");
+    // }
+
+    // int highest_hum_first_digit = read_write_nvs("highest_hum_first_digit", -1, "storage");
+    // int highest_hum_second_digit = read_write_nvs("highest_hum_second_digit", -1, "storage");
+    // int highest_hum_decimal_digit = read_write_nvs("highest_hum_decimal_digit", -1, "storage");
+
+    // float highest_hum = (highest_hum_first_digit * 10) + highest_hum_second_digit + (highest_hum_decimal_digit / 10.0f);
+
+    // if (humidity > highest_hum) {
+    //     highest_hum_first_digit = read_write_nvs("highest_hum_first_digit", hum_first_digit, "storage");
+    //     highest_hum_second_digit = read_write_nvs("highest_hum_second_digit", hum_second_digit, "storage");
+    //     highest_hum_decimal_digit = read_write_nvs("highest_hum_decimal_digit", hum_decimal_digit, "storage");
+    // }
+
+    // int lowest_hum_first_digit = read_write_nvs("lowest_hum_first_digit", -1, "storage");
+    // int lowest_hum_second_digit = read_write_nvs("lowest_hum_second_digit", -1, "storage");
+    // int lowest_hum_decimal_digit = read_write_nvs("lowest_hum_decimal_digit", -1, "storage");
+
+    // float lowest_hum = (lowest_hum_first_digit * 10) + lowest_hum_second_digit + (lowest_hum_decimal_digit / 10.0f);
+
+    // if (humidity > lowest_hum) {
+    //     lowest_hum_first_digit = read_write_nvs("lowest_hum_first_digit", hum_first_digit, "storage");
+    //     lowest_hum_second_digit = read_write_nvs("lowest_hum_second_digit", hum_second_digit, "storage");
+    //     lowest_hum_decimal_digit = read_write_nvs("lowest_hum_decimal_digit", hum_decimal_digit, "storage");
+    // }
+
+    ESP_LOGI("dht22:", "highest temp %d%d.%d", highest_temp_first_digit, highest_temp_second_digit, highest_temp_decimal_digit);
 
 
     // temp
@@ -108,24 +145,33 @@ void dht22_read(void) {
     draw_rect(55, 78, 2, 2); // dot
     draw_small_number(temp_decimal_digit, 3, 50, 45);
 
-    draw_small_number(highest_temp_1, 1, 50, 117);
-    draw_small_number(highest_temp_2, 2, 50, 117);
+    // record high temp
+    draw_small_number(highest_temp_first_digit, 1, 50, 117);
+    draw_small_number(highest_temp_second_digit, 2, 50, 117);
     draw_rect(55, 150, 2, 2); // dot
-    draw_small_number(highest_temp_3, 3, 50, 117);
+    draw_small_number(highest_temp_decimal_digit, 3, 50, 117);
 
-    // record temp
-    
-
-    char hum_buffer[16];
-    snprintf(hum_buffer, sizeof(hum_buffer), "%.1f", humidity);
-
-    int hum_first_digit = hum_buffer[0] - '0';
-    int hum_second_digit = hum_buffer[1] - '0';
-    int hum_decimal_digit = hum_buffer[3] - '0';
+    // // record low temp
+    // draw_small_number(lowest_temp_first_digit, 1, 50, 187);
+    // draw_small_number(lowest_temp_second_digit, 2, 50, 187);
+    // draw_rect(55, 220, 2, 2); // dot
+    // draw_small_number(lowest_temp_decimal_digit, 3, 50, 187);
 
     // humidity
     draw_small_number(hum_first_digit, 1, 10, 45);
     draw_small_number(hum_second_digit, 2, 10, 45);
     draw_rect(15, 78, 2, 2); // dot
     draw_small_number(hum_decimal_digit, 3, 10, 45);
+
+    // // record high humidity
+    // draw_small_number(highest_hum_first_digit, 1, 10, 117);
+    // draw_small_number(highest_hum_second_digit, 2, 10, 117);
+    // draw_rect(15, 150, 2, 2); // dot
+    // draw_small_number(highest_hum_decimal_digit, 3, 10, 117);
+
+    // // record low humidity
+    // draw_small_number(lowest_hum_first_digit, 1, 10, 187);
+    // draw_small_number(lowest_hum_second_digit, 2, 10, 187);
+    // draw_rect(15, 220, 2, 2); // dot
+    // draw_small_number(lowest_hum_decimal_digit, 3, 10, 187);
 }

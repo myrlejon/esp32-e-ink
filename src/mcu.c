@@ -65,6 +65,7 @@ int read_write_nvs(const char* key, int value, const char* storage) {
 
         // Read
         ESP_LOGI("read_write_nvs", "reading value from nvs...");
+        
         err = nvs_get_i32(handle, key, &stored_value);
         switch (err) {
             case ESP_OK:

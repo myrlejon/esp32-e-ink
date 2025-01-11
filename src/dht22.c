@@ -4,6 +4,7 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 #include <stdio.h>
+#include <string.h>
 #include "esp_timer.h"
 #include <time.h>
 #include "nvs_flash.h"
@@ -66,21 +67,11 @@ void dht22_read(void) {
     ESP_LOGI("dht22:", "dht22_data[2] - %d", dht22_data[2]);
     ESP_LOGI("dht22:", "dht22_data[3] - %d", dht22_data[3]);
 
+    set_record_temp("ht", temperature, true, 1); // highest temperature
+    set_record_temp("lt", temperature, false, 2); // lowest temperature
+    set_record_temp("hh", humidity, true, 3); // highest humidity
+    set_record_temp("lh", humidity, false, 4); // lowest humidity
 
-
-    // TODO
-    // save temp and humidity to nvs
-    // int restart_count = read_write_nvs("restart_count", -1, "storage");
-    // int value = read_write_nvs("temperature", temperature, "storage");
-
-    set_record_temp("ht", temperature, true); // highest temperature
-    set_record_temp("lt", temperature, false); // lowest temperature
-    set_record_temp("hh", temperature, true); // highest temperature
-    set_record_temp("lh", temperature, false); // highest temperature
-    
-
-
-    // draw temp on display
     char temp_buffer[16];
     snprintf(temp_buffer, sizeof(temp_buffer), "%.1f", temperature);
     char hum_buffer[16];
@@ -94,108 +85,72 @@ void dht22_read(void) {
     int hum_second_digit = hum_buffer[1] - '0';
     int hum_decimal_digit = hum_buffer[3] - '0';
 
-    int highest_temp_first_digit = read_write_nvs("highest_temp_first_digit", -1, "storage");
-    int highest_temp_second_digit = read_write_nvs("highest_temp_second_digit", -1, "storage");
-    int highest_temp_decimal_digit = read_write_nvs("highest_temp_decimal_digit", -1, "storage");
-
-    float highest_temp = (highest_temp_first_digit * 10) + highest_temp_second_digit + (highest_temp_decimal_digit / 10.0f);
-
-    if (temperature > highest_temp) {
-        highest_temp_first_digit = read_write_nvs("highest_temp_first_digit", temp_first_digit, "storage");
-        highest_temp_second_digit = read_write_nvs("highest_temp_second_digit", temp_second_digit, "storage");
-        highest_temp_decimal_digit = read_write_nvs("highest_temp_decimal_digit", temp_decimal_digit, "storage");
-    }
-
-    // int lowest_temp_first_digit = read_write_nvs("lowest_temp_first_digit", -1, "storage");
-    // int lowest_temp_second_digit = read_write_nvs("lowest_temp_second_digit", -1, "storage");
-    // int lowest_temp_decimal_digit = read_write_nvs("lowest_temp_decimal_digit", -1, "storage");
-
-    // float lowest_temp = (lowest_temp_first_digit * 10) + lowest_temp_second_digit + (lowest_temp_decimal_digit / 10.0f);
-
-    // if (temperature < lowest_temp) {
-    //     lowest_temp_first_digit = read_write_nvs("lowest_temp_first_digit", temp_first_digit, "storage");
-    //     lowest_temp_second_digit = read_write_nvs("lowest_temp_second_digit", temp_second_digit, "storage");
-    //     lowest_temp_decimal_digit = read_write_nvs("lowest_temp_decimal_digit", temp_decimal_digit, "storage");
-    // }
-
-    // int highest_hum_first_digit = read_write_nvs("highest_hum_first_digit", -1, "storage");
-    // int highest_hum_second_digit = read_write_nvs("highest_hum_second_digit", -1, "storage");
-    // int highest_hum_decimal_digit = read_write_nvs("highest_hum_decimal_digit", -1, "storage");
-
-    // float highest_hum = (highest_hum_first_digit * 10) + highest_hum_second_digit + (highest_hum_decimal_digit / 10.0f);
-
-    // if (humidity > highest_hum) {
-    //     highest_hum_first_digit = read_write_nvs("highest_hum_first_digit", hum_first_digit, "storage");
-    //     highest_hum_second_digit = read_write_nvs("highest_hum_second_digit", hum_second_digit, "storage");
-    //     highest_hum_decimal_digit = read_write_nvs("highest_hum_decimal_digit", hum_decimal_digit, "storage");
-    // }
-
-    // int lowest_hum_first_digit = read_write_nvs("lowest_hum_first_digit", -1, "storage");
-    // int lowest_hum_second_digit = read_write_nvs("lowest_hum_second_digit", -1, "storage");
-    // int lowest_hum_decimal_digit = read_write_nvs("lowest_hum_decimal_digit", -1, "storage");
-
-    // float lowest_hum = (lowest_hum_first_digit * 10) + lowest_hum_second_digit + (lowest_hum_decimal_digit / 10.0f);
-
-    // if (humidity > lowest_hum) {
-    //     lowest_hum_first_digit = read_write_nvs("lowest_hum_first_digit", hum_first_digit, "storage");
-    //     lowest_hum_second_digit = read_write_nvs("lowest_hum_second_digit", hum_second_digit, "storage");
-    //     lowest_hum_decimal_digit = read_write_nvs("lowest_hum_decimal_digit", hum_decimal_digit, "storage");
-    // }
-
-    ESP_LOGI("dht22:", "highest temp %d%d.%d", highest_temp_first_digit, highest_temp_second_digit, highest_temp_decimal_digit);
-
-
     // temp
     draw_small_number(temp_first_digit, 1, 50, 45);
     draw_small_number(temp_second_digit, 2, 50, 45);
     draw_rect(55, 78, 2, 2); // dot
     draw_small_number(temp_decimal_digit, 3, 50, 45);
 
-    // record high temp
-    draw_small_number(highest_temp_first_digit, 1, 50, 117);
-    draw_small_number(highest_temp_second_digit, 2, 50, 117);
-    draw_rect(55, 150, 2, 2); // dot
-    draw_small_number(highest_temp_decimal_digit, 3, 50, 117);
-
-    // // record low temp
-    // draw_small_number(lowest_temp_first_digit, 1, 50, 187);
-    // draw_small_number(lowest_temp_second_digit, 2, 50, 187);
-    // draw_rect(55, 220, 2, 2); // dot
-    // draw_small_number(lowest_temp_decimal_digit, 3, 50, 187);
-
     // humidity
     draw_small_number(hum_first_digit, 1, 10, 45);
     draw_small_number(hum_second_digit, 2, 10, 45);
     draw_rect(15, 78, 2, 2); // dot
     draw_small_number(hum_decimal_digit, 3, 10, 45);
-
-    // // record high humidity
-    // draw_small_number(highest_hum_first_digit, 1, 10, 117);
-    // draw_small_number(highest_hum_second_digit, 2, 10, 117);
-    // draw_rect(15, 150, 2, 2); // dot
-    // draw_small_number(highest_hum_decimal_digit, 3, 10, 117);
-
-    // // record low humidity
-    // draw_small_number(lowest_hum_first_digit, 1, 10, 187);
-    // draw_small_number(lowest_hum_second_digit, 2, 10, 187);
-    // draw_rect(15, 220, 2, 2); // dot
-    // draw_small_number(lowest_hum_decimal_digit, 3, 10, 187);
 }
 
-void set_record_temp(char key_name[], float value, bool high) {
-    char first_digit[16] = { key_name, "fd" };
-    ESP_LOGI("set_record_temp:", "first digit - %s", first_digit);
+void set_record_temp(char key_name[], float value, bool high, int position) {
+    char first_digit[4] = "fd";
+    char second_digit[4] = "sd";
+    char decimal_digit[4] = "dd";
+    
+    strcat(first_digit, key_name);
+    strcat(second_digit, key_name);
+    strcat(decimal_digit, key_name);
 
+    int first_digit_record_value = read_write_nvs(first_digit, -1, "storage");
+    int second_digit_record_value = read_write_nvs(second_digit, -1, "storage");
+    int decimal_digit_record_value = read_write_nvs(decimal_digit, -1, "storage");
 
-    // int highest_temp_first_digit = read_write_nvs("highest_temp_first_digit", -1, "storage");
-    // int highest_temp_second_digit = read_write_nvs("highest_temp_second_digit", -1, "storage");
-    // int highest_temp_decimal_digit = read_write_nvs("highest_temp_decimal_digit", -1, "storage");
+    float record_value = (first_digit_record_value * 10) + second_digit_record_value + (decimal_digit_record_value / 10.0f);
 
-    // float highest_temp = (highest_temp_first_digit * 10) + highest_temp_second_digit + (highest_temp_decimal_digit / 10.0f);
+    if ((record_value > value && high) || (record_value < value && !high)) {
+        char buffer[16];
+        snprintf(buffer, sizeof(buffer), "%.1f", value);
 
-    // if (temperature > highest_temp) {
-    //     highest_temp_first_digit = read_write_nvs("highest_temp_first_digit", temp_first_digit, "storage");
-    //     highest_temp_second_digit = read_write_nvs("highest_temp_second_digit", temp_second_digit, "storage");
-    //     highest_temp_decimal_digit = read_write_nvs("highest_temp_decimal_digit", temp_decimal_digit, "storage");
-    // }
+        int first_digit_value = buffer[0] - '0';
+        int second_digit_value = buffer[1] - '0';
+        int decimal_digit_value = buffer[3] - '0';
+
+        read_write_nvs(first_digit, first_digit_value, "storage");
+        read_write_nvs(second_digit, second_digit_value, "storage");
+        read_write_nvs(decimal_digit, decimal_digit_value, "storage");
+    }
+
+    switch (position)
+    {
+        case 1:
+            draw_small_number(first_digit_record_value, 1, 50, 117);
+            draw_small_number(second_digit_record_value, 2, 50, 117);
+            draw_rect(55, 150, 2, 2); // dot
+            draw_small_number(decimal_digit_record_value, 3, 50, 117);
+            break;
+        case 2:
+            draw_small_number(first_digit_record_value, 1, 50, 187);
+            draw_small_number(second_digit_record_value, 2, 50, 187);
+            draw_rect(55, 220, 2, 2); // dot
+            draw_small_number(decimal_digit_record_value, 3, 50, 187);
+            break;
+        case 3:
+            draw_small_number(first_digit_record_value, 1, 10, 117);
+            draw_small_number(second_digit_record_value, 2, 10, 117);
+            draw_rect(15, 150, 2, 2); // dot
+            draw_small_number(decimal_digit_record_value, 3, 10, 117);
+            break;
+        case 4:
+            draw_small_number(first_digit_record_value, 1, 10, 187);
+            draw_small_number(second_digit_record_value, 2, 10, 187);
+            draw_rect(15, 220, 2, 2); // dot
+            draw_small_number(decimal_digit_record_value, 3, 10, 187);
+            break;
+    }
 }

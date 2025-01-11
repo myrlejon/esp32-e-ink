@@ -99,13 +99,17 @@ void dht22_read(void) {
 }
 
 void set_record_temp(char key_name[], float value, bool high, int position) {
-    char first_digit[4] = "fd";
-    char second_digit[4] = "sd";
-    char decimal_digit[4] = "dd";
+    char first_digit[16] = "fd";
+    char second_digit[16] = "sd";
+    char decimal_digit[16] = "dd";
     
     strcat(first_digit, key_name);
     strcat(second_digit, key_name);
     strcat(decimal_digit, key_name);
+
+    ESP_LOGI("set record temp", "first digit - %s", first_digit);
+    ESP_LOGI("set record temp", "second digit - %s", second_digit);
+    ESP_LOGI("set record temp", "decimal digit - %s", decimal_digit);
 
     int first_digit_record_value = read_write_nvs(first_digit, -1, "storage");
     int second_digit_record_value = read_write_nvs(second_digit, -1, "storage");
@@ -113,13 +117,19 @@ void set_record_temp(char key_name[], float value, bool high, int position) {
 
     float record_value = (first_digit_record_value * 10) + second_digit_record_value + (decimal_digit_record_value / 10.0f);
 
-    if ((record_value > value && high) || (record_value < value && !high)) {
+    if ((value > record_value && high) || (value < record_value && !high)) {
+        ESP_LOGI("set_record_temp", "record value - %f", record_value);
+        ESP_LOGI("set_record_temp", "value - %f", value);
         char buffer[16];
         snprintf(buffer, sizeof(buffer), "%.1f", value);
 
         int first_digit_value = buffer[0] - '0';
         int second_digit_value = buffer[1] - '0';
         int decimal_digit_value = buffer[3] - '0';
+
+        ESP_LOGI("set record temp", "first_digit_value - %d", first_digit_value);
+        ESP_LOGI("set record temp", "second_digit_value - %d", second_digit_value);
+        ESP_LOGI("set record temp", "decimal_digit_value - %d", decimal_digit_value);
 
         read_write_nvs(first_digit, first_digit_value, "storage");
         read_write_nvs(second_digit, second_digit_value, "storage");

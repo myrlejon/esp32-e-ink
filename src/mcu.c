@@ -8,33 +8,33 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 
-#define SLEEP_TIME 1 // minutes
+#define SLEEP_TIME 15 // minutes
 
 void mcu_sleep(void) {
-    // esp_sleep_enable_timer_wakeup(SLEEP_TIME * 60 * 1000000); // minutes * seconds * 10^6 (convert microseconds > seconds)
-    // ESP_LOGI("sleep:", "going to sleep for %d minutes", SLEEP_TIME);
-    // esp_deep_sleep_start();
-
-    // TODO - fix so that MCU goes to sleep, right now it just waits for 15 minutes then resets
-
-    // esp_rom_delay_us(1000000);
+    esp_err_t err;
 
     // read and write to restart count
     int restart_count = read_write_nvs("restart_count", -1, "storage");
     // reset restart_count every 24 hours (24 * 4, as it wakes up every 15 minutes)
     if (restart_count == 96) {
+        // TODO - reset the 24h record temps
         restart_count = 0;
     }
     restart_count++;
     ESP_LOGI("sleep:", "restart_count - %d", restart_count);
     read_write_nvs("restart_count", restart_count, "storage");
-
-    ESP_LOGI("sleep:", "waiting %d minutes then restart", SLEEP_TIME);
-    vTaskDelay(pdMS_TO_TICKS(1000 * SLEEP_TIME * 60));
+    ESP_LOGI("sleep:", "waiting for 3 seconds then going to sleep...");
+    vTaskDelay(pdMS_TO_TICKS(1000 * 3));
+    ESP_LOGI("sleep:", "going to sleep for %d minutes, goodnight", SLEEP_TIME);
+    
+    err = esp_sleep_enable_timer_wakeup(SLEEP_TIME * 60 * 1000000); // minutes * seconds * 10^6 (convert microseconds > seconds)
+    esp_deep_sleep_start();
+    if (err != ESP_OK) {
+        ESP_LOGE("sleep:", "err - %s", esp_err_to_name(err));
+    }
+    ESP_LOGI("sleep:", "goodmorning");
     ESP_LOGI("sleep:", "restarting");
     esp_restart();
-
-    // ESP_LOGI("sleep:", "wake up, restarting");
 }
 
 // reads (return) and writes (with parameters) from key value pairs

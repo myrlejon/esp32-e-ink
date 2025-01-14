@@ -67,10 +67,19 @@ void dht22_read(void) {
     ESP_LOGI("dht22:", "dht22_data[2] - %d", dht22_data[2]);
     ESP_LOGI("dht22:", "dht22_data[3] - %d", dht22_data[3]);
 
-    set_record_temp("ht", temperature, true, 1); // highest temperature
-    set_record_temp("lt", temperature, false, 2); // lowest temperature
-    set_record_temp("hh", humidity, true, 3); // highest humidity
-    set_record_temp("lh", humidity, false, 4); // lowest humidity
+    int restart_count = read_write_nvs("restart_count", -1, "storage");
+
+    set_record_temp("ht", temperature, true, 1, restart_count); // highest temperature
+    set_record_temp("lt", temperature, false, 2, restart_count); // lowest temperature
+    set_record_temp("hh", humidity, true, 3, restart_count); // highest humidity
+    set_record_temp("lh", humidity, false, 4, restart_count); // lowest humidity
+    
+    restart_count++;
+    if (restart_count == 96) {
+        restart_count = 0;
+    }
+    ESP_LOGI("dht22:", "restart count - %d", restart_count);
+    read_write_nvs("restart_count", restart_count, "storage");
 
     char temp_buffer[16];
     snprintf(temp_buffer, sizeof(temp_buffer), "%.1f", temperature);
@@ -98,7 +107,7 @@ void dht22_read(void) {
     draw_small_number(hum_decimal_digit, 3, 10, 45);
 }
 
-void set_record_temp(char key_name[], float value, bool high, int position) {
+void set_record_temp(char key_name[], float value, bool high, int position, int restart_count) {
     char first_digit[16] = "fd";
     char second_digit[16] = "sd";
     char decimal_digit[16] = "dd";
@@ -116,8 +125,9 @@ void set_record_temp(char key_name[], float value, bool high, int position) {
     int decimal_digit_record_value = read_write_nvs(decimal_digit, -1, "storage");
 
     float record_value = (first_digit_record_value * 10) + second_digit_record_value + (decimal_digit_record_value / 10.0f);
-
-    if ((value > record_value && high) || (value < record_value && !high)) {
+    
+    // reset restart_count every 24 hours (24 * 4 = 96, as it wakes up every 15 minutes)
+    if ((value > record_value && high) || (value < record_value && !high) || restart_count == 96) {
         ESP_LOGI("set_record_temp", "record value - %f", record_value);
         ESP_LOGI("set_record_temp", "value - %f", value);
         char buffer[16];

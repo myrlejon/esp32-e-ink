@@ -13,16 +13,16 @@
 void mcu_sleep(void) {
     esp_err_t err;
 
-    // read and write to restart count
-    int restart_count = read_write_nvs("restart_count", -1, "storage");
-    // reset restart_count every 24 hours (24 * 4, as it wakes up every 15 minutes)
-    if (restart_count == 96) {
-        // TODO - reset the 24h record temps
-        restart_count = 0;
-    }
-    restart_count++;
-    ESP_LOGI("sleep:", "restart_count - %d", restart_count);
-    read_write_nvs("restart_count", restart_count, "storage");
+    // // read and write to restart count
+    // int restart_count = read_write_nvs("restart_count", -1, "storage");
+    // // reset restart_count every 24 hours (24 * 4, as it wakes up every 15 minutes)
+    // if (restart_count == 96) {
+    //     // TODO - reset the 24h record temps
+    //     restart_count = 0;
+    // }
+    // restart_count++;
+    // ESP_LOGI("sleep:", "restart_count - %d", restart_count);
+    // read_write_nvs("restart_count", restart_count, "storage");
     ESP_LOGI("sleep:", "waiting for 3 seconds then going to sleep...");
     vTaskDelay(pdMS_TO_TICKS(1000 * 3));
     ESP_LOGI("sleep:", "going to sleep for %d minutes, goodnight", SLEEP_TIME);

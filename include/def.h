@@ -34,7 +34,7 @@ void draw_pixel(int x, int y, uint8_t color);
 void draw_command(bool invert);
 
 // temp
-void set_record_temp(char key_name[], float value, bool high, int position);
+void set_record_temp(char key_name[], float value, bool high, int position, int restart_count);
 void dht22_read(void);
 int read_write_nvs(const char* key, int value, const char* storage);
 
